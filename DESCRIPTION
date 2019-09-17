@@ -1,0 +1,20 @@
+Package: cop
+Type: Package
+Title: Custom OPs
+Version: 0.1-0
+Description: Some custom reduction operations for 'MPI'.
+License: BSD 2-clause License + file LICENSE
+Depends:
+    R (>= 3.3.0),
+    pbdMPI (>= 0.3-0)
+ByteCompile: yes
+Authors@R: c(
+    person("Drew", "Schmidt", role = c("aut", "cre"), email = "wrathematics@gmail.com"), 
+    person("ORNL", role = "cph")
+    )
+URL: https://pbdr.org/
+BugReports: http://group.pbdr.org/
+MailingList: Please send questions and comments regarding pbdR to
+    RBigData@gmail.com
+Maintainer: Drew Schmidt <wrathematics@gmail.com>
+RoxygenNote: 6.1.1
