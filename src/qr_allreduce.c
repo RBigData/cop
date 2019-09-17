@@ -127,7 +127,6 @@ SEXP cop_allreduce_mat_qr(SEXP send_data, SEXP R_comm, SEXP root)
 {
   MPI_Comm comm = get_mpi_comm_from_Robj(R_comm);
   
-  // data setup
   const int m = nrows(send_data);
   const int n = ncols(send_data);
   
