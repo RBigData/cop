@@ -3,6 +3,8 @@
 #include <stddef.h>
 #include <string.h>
 
+#define REDUCE_TO_ALL -1
+
 SEXP R_env;
 SEXP R_fcall;
 
@@ -105,7 +107,7 @@ SEXP cop_allreduce_mat_userop(SEXP send_data, SEXP R_comm, SEXP fun,
   MPI_Op op;
   MPI_Op_create((MPI_User_function*) mat_op_eval_R, LOGICAL(commutative)[0], &op);
   int ret;
-  if (INTEGER(root)[0] == -1)
+  if (INTEGER(root)[0] == REDUCE_TO_ALL)
     ret = MPI_Allreduce(REAL(send_data), REAL(recv_data), 1, mat_type, op, comm);
   else
     ret = MPI_Reduce(REAL(send_data), REAL(recv_data), 1, mat_type, op, INTEGER(root)[0], comm);

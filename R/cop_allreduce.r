@@ -1,3 +1,7 @@
+REDUCE_TO_ALL = -1L
+
+
+
 #' @useDynLib cop cop_allreduce_mat_userop
 reducer = function(x, fun, commutative, root, comm=0L, env=parent.frame())
 {
@@ -22,7 +26,7 @@ reducer = function(x, fun, commutative, root, comm=0L, env=parent.frame())
 #' @export
 cop_allreduce = function(x, fun, commutative, comm=0L, env=new.env())
 {
-  reducer(x, fun, commutative, root=-1L, comm=comm, env=env)
+  reducer(x, fun, commutative, root=REDUCE_TO_ALL, comm=comm, env=env)
 }
 
 #' @export
