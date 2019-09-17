@@ -5,17 +5,16 @@ REDUCE_TO_ALL = -1L
 #' @useDynLib cop cop_allreduce_mat_qr
 qr_reducer = function(x, root, comm=0L)
 {
+  check_is_matrix(x)
+  check_common_matrix_dims(x)
+  
+  if (!is.double(x))
+    storage.mode(x) = "double"
+  
   comm = as.integer(comm)
   comm_ptr = pbdMPI::get.mpi.comm.ptr(comm)
   
-  if (is.matrix(x))
-  {
-    if (!is.double(x))
-      storage.mode(x) = "double"
-    
-    ret = .Call("cop_allreduce_mat_qr", x, comm_ptr, root, PACKAGE="cop")
-  }
-  
+  ret = .Call("cop_allreduce_mat_qr", x, comm_ptr, root, PACKAGE="cop")
   ret
 }
 
