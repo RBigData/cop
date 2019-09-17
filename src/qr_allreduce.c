@@ -1,86 +1,16 @@
-#include <mpi.h>
-#include <Rinternals.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define REDUCE_TO_ALL -1
+#include "defs.h"
+#include "utils.h"
 
-
-static inline MPI_Comm get_mpi_comm_from_Robj(SEXP comm_ptr)
-{
-  MPI_Comm *comm = (MPI_Comm*) R_ExternalPtrAddr(comm_ptr);
-  return *comm;
-}
-
-
-
-static inline void check_MPI_ret(int ret)
-{
-  if (ret != MPI_SUCCESS)
-  {
-    int slen;
-    char s[MPI_MAX_ERROR_STRING];
-    
-    MPI_Error_string(ret, s, &slen);
-    error(s);
-  }
-}
-
-
-
-static inline SEXP evalfun_stringarg(const char *const restrict fun, const char *const restrict arg)
-{
-  SEXP ret, expr, fun_install, arg_str;
-  PROTECT(fun_install = install(fun));
-  PROTECT(arg_str = ScalarString(mkChar(arg)));
-  PROTECT(expr = lang2(fun_install, arg_str));
-  PROTECT(ret = eval(expr, R_GlobalEnv));
-  
-  UNPROTECT(4);
-  return ret;
-}
-
-static inline void PRINT(SEXP x)
-{
-  SEXP basePackage;
-  SEXP print_install;
-  SEXP expr;
-  
-  PROTECT(basePackage = evalfun_stringarg("getNamespace", "base"));
-  
-  PROTECT(print_install = install("print"));
-  PROTECT(expr = lang2(print_install, x));
-  eval(expr, basePackage);
-  
-  UNPROTECT(3);
-}
-
-
-
-// ----------------------------------------------------------------------------
-// matrix ops
-// ----------------------------------------------------------------------------
-
-static inline void matprinter(int m, int n, double *x)
-{
-  for (int i=0; i<m; i++)
-  {
-    for (int j=0; j<n; j++)
-      printf("%.2f ", x[i + m*j]);
-    
-    putchar('\n');
-  }
-  putchar('\n');
-}
-
-#define MAX(a,b) ((a)<(b)?(b):(a))
-#define MIN(a,b) ((a)<(b)?(a):(b))
 
 extern void dgeqp3_(const int *const m, const int *const n,
   double *const restrict A, const int *const lda, int *const restrict jpvt,
   double *const restrict tau, double *const restrict work,
   const int *const restrict lwork, int *const restrict info);
+
 
 int _m, _n, _minmn;
 int _mtb;
