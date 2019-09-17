@@ -71,11 +71,16 @@ static void custom_op_qr(double *a, double *b, int *len, MPI_Datatype *dtype)
   
   int info;
   
+  #pragma omp parallel for default(shared) if(_m*_n > OMP_MIN_SIZE)
   for (int j=0; j<_n; j++)
   {
+    // memcpy(_tallboy + _mtb*j, a + _m*j, _m*sizeof(double));
+    #pragma omp simd
     for (int i=0; i<_m; i++)
       _tallboy[i + _mtb*j] = a[i + _m*j];
     
+    // memcpy(_tallboy + _m + _mtb*j, b + _m*j, _m*sizeof(double));
+    #pragma omp simd
     for (int i=0; i<_m; i++)
       _tallboy[_m+i + _mtb*j] = b[i + _m*j];
   }
@@ -85,6 +90,7 @@ static void custom_op_qr(double *a, double *b, int *len, MPI_Datatype *dtype)
   memset(b, 0, _len);
   for (int j=0; j<_n; j++)
   {
+    #pragma omp for simd
     for (int i=0; i<=j; i++)
       b[i + _m*j] = _tallboy[i + _mtb*j];
   }
