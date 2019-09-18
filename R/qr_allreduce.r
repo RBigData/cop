@@ -1,9 +1,3 @@
-REDUCE_TO_ALL = -1L
-TYPE_DOUBLE = 1L
-TYPE_FLOAT = 2L
-
-
-
 #' @useDynLib cop cop_allreduce_mat_qr
 qr_reducer = function(x, root, comm=0L, type)
 {
