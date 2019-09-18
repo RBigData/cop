@@ -172,10 +172,11 @@ extern "C" SEXP cop_allreduce_mat_qr(SEXP send_data, SEXP R_comm, SEXP root_, SE
   MPI_Comm_rank(comm, &rank);
   
   SEXP recv_data;
-  PROTECT(recv_data = allocMatrix(REALSXP, _m, _n));
   
   if (INTEGER(type)[0] == TYPE_DOUBLE)
   {
+    PROTECT(recv_data = allocMatrix(REALSXP, _m, _n));
+    
     qr_global_init<double>(_m, _n);
     ret = qr_allreduce(root, REAL(send_data), REAL(recv_data), MPI_DOUBLE, comm);
     qr_global_cleanup<double>();
@@ -191,6 +192,7 @@ extern "C" SEXP cop_allreduce_mat_qr(SEXP send_data, SEXP R_comm, SEXP root_, SE
     qr_global_cleanup<float>();
     
     free(send_data_f);
+    PROTECT(recv_data = allocMatrix(REALSXP, _m, _n));
     if (root == REDUCE_TO_ALL || root == rank)
       floatconv(m, n, recv_data_f, REAL(recv_data));
     free(recv_data_f);
