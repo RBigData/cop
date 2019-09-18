@@ -24,6 +24,19 @@ REAL *qraux;
 
 
 
+template <typename T, typename S>
+void floatconv(const int nr, const int nc, const T *src, S *dst)
+{
+  for (int j=0; j<nc; j++)
+  {
+    #pragma omp for simd
+    for (int i=0; i<nr; i++)
+      dst[i + nr*j] = (S) src[i + nr*j];
+  }
+}
+
+
+
 static inline void FREE(void *x)
 {
   if (x != NULL)
@@ -167,16 +180,14 @@ extern "C" SEXP cop_allreduce_mat_qr(SEXP send_data, SEXP R_comm, SEXP root, SEX
   {
     float *send_data_f = (float*) malloc(m*n*sizeof(*send_data_f));
     float *recv_data_f = (float*) malloc(m*n*sizeof(*recv_data_f));
-    for (int i=0; i<_m*_n; i++)
-      send_data_f[i] = (float) REAL(send_data)[i];
+    floatconv(m, n, REAL(send_data), send_data_f);
     
     qr_global_init<float>(_m, _n);
     ret = qr_allreduce(INTEGER(root)[0], send_data_f, recv_data_f, MPI_FLOAT, comm);
     qr_global_cleanup<float>();
     
     free(send_data_f);
-    for (int i=0; i<_m*_n; i++)
-      REAL(recv_data)[i] = (double) recv_data_f[i];
+    floatconv(m, n, recv_data_f, REAL(recv_data));
     free(recv_data_f);
   }
   
