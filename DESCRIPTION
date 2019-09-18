@@ -5,9 +5,9 @@ Version: 0.1-0
 Description: Some custom reduction operations for 'MPI'.
 License: BSD 2-clause License + file LICENSE
 Depends:
-    R (>= 3.3.0),
+    R (>= 3.4.0),
     pbdMPI (>= 0.3-0)
-SystemRequirements: C++11
+SystemRequirements: C++14
 ByteCompile: yes
 Authors@R: c(
     person("Drew", "Schmidt", role = c("aut", "cre"), email = "wrathematics@gmail.com"), 
