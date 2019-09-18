@@ -159,7 +159,7 @@ int qr_allreduce(const int root, const REAL *const restrict a,
 
 
 
-extern "C" SEXP cop_allreduce_mat_qr(SEXP send_data, SEXP R_comm, SEXP root, SEXP type)
+extern "C" SEXP cop_allreduce_mat_qr(SEXP send_data, SEXP R_comm, SEXP root_, SEXP type)
 {
   int ret;
   MPI_Comm comm = get_mpi_comm_from_Robj(R_comm);
@@ -167,32 +167,40 @@ extern "C" SEXP cop_allreduce_mat_qr(SEXP send_data, SEXP R_comm, SEXP root, SEX
   const int _m = nrows(send_data);
   const int _n = ncols(send_data);
   
+  const int root = INTEGER(root_)[0];
+  int rank;
+  MPI_Comm_rank(comm, &rank);
+  
   SEXP recv_data;
   PROTECT(recv_data = allocMatrix(REALSXP, _m, _n));
   
   if (INTEGER(type)[0] == TYPE_DOUBLE)
   {
     qr_global_init<double>(_m, _n);
-    ret = qr_allreduce(INTEGER(root)[0], REAL(send_data), REAL(recv_data), MPI_DOUBLE, comm);
+    ret = qr_allreduce(root, REAL(send_data), REAL(recv_data), MPI_DOUBLE, comm);
     qr_global_cleanup<double>();
   }
-  else
+  else // if (INTEGER(type)[0] == TYPE_FLOAT)
   {
     float *send_data_f = (float*) malloc(m*n*sizeof(*send_data_f));
     float *recv_data_f = (float*) malloc(m*n*sizeof(*recv_data_f));
     floatconv(m, n, REAL(send_data), send_data_f);
     
     qr_global_init<float>(_m, _n);
-    ret = qr_allreduce(INTEGER(root)[0], send_data_f, recv_data_f, MPI_FLOAT, comm);
+    ret = qr_allreduce(root, send_data_f, recv_data_f, MPI_FLOAT, comm);
     qr_global_cleanup<float>();
     
     free(send_data_f);
-    floatconv(m, n, recv_data_f, REAL(recv_data));
+    if (root == REDUCE_TO_ALL || root == rank)
+      floatconv(m, n, recv_data_f, REAL(recv_data));
     free(recv_data_f);
   }
   
   check_MPI_ret(ret);
   
   UNPROTECT(1);
-  return(recv_data);
+  if (root == REDUCE_TO_ALL || root == rank)
+    return recv_data;
+  else
+    return R_NilValue;
 }

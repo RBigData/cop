@@ -6,6 +6,8 @@ qr_reducer = function(x, root, comm=0L, type)
   type = comm.match.arg(tolower(type), TYPES_STR, comm=comm)
   type_int = type_str2int(type)
   
+  root = as.integer(root)
+  
   if (!is.double(x))
     storage.mode(x) = "double"
   
@@ -25,7 +27,7 @@ qr_allreduce = function(x, comm=0L, type="double")
 }
 
 #' @export
-qr_reduce = function(x, root, comm=0L, type="double")
+qr_reduce = function(x, root=0, comm=0L, type="double")
 {
   qr_reducer(x, root=root, comm=comm, type=type)
 }
