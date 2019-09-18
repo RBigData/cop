@@ -34,7 +34,7 @@ static inline void FREE(void *x)
 }
 
 template <typename REAL>
-void cleanup()
+void qr_global_cleanup()
 {
   FREE(tallboy<REAL>);
   FREE(work<REAL>);
@@ -44,7 +44,7 @@ void cleanup()
 
 
 
-static inline int worksize(const int m, const int n)
+static inline int qr_worksize(const int m, const int n)
 {
   double tmp;
   
@@ -56,7 +56,7 @@ static inline int worksize(const int m, const int n)
 }
 
 template <typename REAL>
-void init(int _m, int _n)
+void qr_global_init(int _m, int _n)
 {
   m = _m;
   n = _n;
@@ -65,14 +65,14 @@ void init(int _m, int _n)
   copylen = (size_t) m*n * sizeof(REAL);
   
   tallboy<REAL> = (REAL*) malloc(mtb*n * sizeof(REAL));
-  lwork = worksize(mtb, n);
+  lwork = qr_worksize(mtb, n);
   work<REAL> = (REAL*) malloc(lwork * sizeof(REAL));
   qraux<REAL> = (REAL*) malloc(minmn * sizeof(REAL));
   pivot = (int*) malloc(n * sizeof(REAL));
   
   if (tallboy<REAL> == NULL || work<REAL> == NULL || qraux<REAL> == NULL || pivot == NULL)
   {
-    cleanup<REAL>();
+    qr_global_cleanup<REAL>();
     error("OOM");
   }
 }
@@ -80,7 +80,7 @@ void init(int _m, int _n)
 
 
 template <typename REAL>
-void custom_op(void *_a, void *_b, int *len, MPI_Datatype *dtype)
+void custom_op_qr(void *_a, void *_b, int *len, MPI_Datatype *dtype)
 {
   (void)len;
   (void)dtype;
@@ -117,7 +117,7 @@ void custom_op(void *_a, void *_b, int *len, MPI_Datatype *dtype)
 
 
 template <typename REAL>
-int allreduce(const int root, const REAL *const restrict a, 
+int qr_allreduce(const int root, const REAL *const restrict a, 
   REAL *const restrict b, MPI_Datatype dt, MPI_Comm comm)
 {
   int ret;
@@ -131,7 +131,7 @@ int allreduce(const int root, const REAL *const restrict a,
   MPI_Op op;
   const int commutative = 1;
   
-  MPI_Op_create((MPI_User_function*) custom_op<REAL>, commutative, &op);
+  MPI_Op_create((MPI_User_function*) custom_op_qr<REAL>, commutative, &op);
   if (root == REDUCE_TO_ALL)
     ret = MPI_Allreduce(a, b, 1, mat_type, op, comm);
   else
@@ -159,9 +159,9 @@ extern "C" SEXP cop_allreduce_mat_qr(SEXP send_data, SEXP R_comm, SEXP root, SEX
   
   if (INTEGER(type)[0] == TYPE_DOUBLE)
   {
-    init<double>(_m, _n);
-    ret = allreduce(INTEGER(root)[0], REAL(send_data), REAL(recv_data), MPI_DOUBLE, comm);
-    cleanup<double>();
+    qr_global_init<double>(_m, _n);
+    ret = qr_allreduce(INTEGER(root)[0], REAL(send_data), REAL(recv_data), MPI_DOUBLE, comm);
+    qr_global_cleanup<double>();
   }
   else
   {
@@ -170,13 +170,14 @@ extern "C" SEXP cop_allreduce_mat_qr(SEXP send_data, SEXP R_comm, SEXP root, SEX
     for (int i=0; i<_m*_n; i++)
       send_data_f[i] = (float) REAL(send_data)[i];
     
-    init<float>(_m, _n);
-    ret = allreduce(INTEGER(root)[0], send_data_f, recv_data_f, MPI_FLOAT, comm);
-    cleanup<float>();
+    qr_global_init<float>(_m, _n);
+    ret = qr_allreduce(INTEGER(root)[0], send_data_f, recv_data_f, MPI_FLOAT, comm);
+    qr_global_cleanup<float>();
     
     free(send_data_f);
     for (int i=0; i<_m*_n; i++)
       REAL(recv_data)[i] = (double) recv_data_f[i];
+    free(recv_data_f);
   }
   
   check_MPI_ret(ret);
