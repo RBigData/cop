@@ -15,7 +15,7 @@ reducer = function(x, fun, commutative, root, comm=0L, env=parent.frame())
     if (!is.double(x))
       storage.mode(x) = "double"
     
-    ret = .Call("cop_allreduce_mat_userop", x, comm_ptr, fun, commutative, env, root, PACKAGE="cop")
+    ret = .Call(cop_allreduce_mat_userop, x, comm_ptr, fun, commutative, env, root)
   }
   
   ret
