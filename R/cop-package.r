@@ -3,6 +3,8 @@
 #' TODO
 #' 
 #' @import pbdMPI
+#' @importFrom float fl
+#' @importFrom utils capture.output
 #' 
 #' @name cop-package
 #' @docType package
