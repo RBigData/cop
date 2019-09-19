@@ -5,7 +5,7 @@
 #include <R_ext/Rdynload.h>
 #include <stdlib.h>
 
-extern SEXP cop_allreduce_mat_userop(SEXP send_data, SEXP R_comm, SEXP fun, SEXP commutative, SEXP env, SEXP root);
+extern SEXP cop_allreduce_mat_userop(SEXP send_data, SEXP R_comm, SEXP root, SEXP commutative, SEXP fun, SEXP env);
 extern SEXP cop_allreduce_mat_qr(SEXP send_data, SEXP R_comm, SEXP root_, SEXP type);
 
 static const R_CallMethodDef CallEntries[] = {

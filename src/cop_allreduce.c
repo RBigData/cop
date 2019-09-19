@@ -23,18 +23,19 @@ static void custom_op_matrix(double *a, double *b, int *len, MPI_Datatype *dtype
   (void)len;
   (void)dtype;
   
-  for (int i=0; i<4; i++) b[i] += a[i];
+  // for testing
+  // for (int i=0; i<4; i++) b[i] += a[i];
   
-  // SEXP lhs;
-  // PROTECT(lhs = eval(R_fcall, R_env));
-  // memcpy(b, REAL(lhs), _len);
-  // UNPROTECT(1);
+  SEXP lhs;
+  PROTECT(lhs = eval(R_fcall, R_env));
+  memcpy(b, REAL(lhs), _len);
+  UNPROTECT(1);
 }
 
 
 
-SEXP cop_allreduce_mat_userop(SEXP send_data, SEXP R_comm, SEXP fun,
-  SEXP commutative, SEXP env, SEXP root)
+SEXP cop_allreduce_mat_userop(SEXP send_data, SEXP R_comm, SEXP root, 
+  SEXP commutative, SEXP fun, SEXP env)
 {
   MPI_Comm comm = get_mpi_comm_from_Robj(R_comm);
   

@@ -11,11 +11,10 @@ mpi_cat("\n", quiet=TRUE)
 mpi_cat("function:\n", quiet=TRUE)
 mpi_print(add)
 
-ar=TRUE
 mpi_cat("\ninput:\n", quiet=TRUE)
-mpi_print(x, all.rank=ar)
+mpi_print(x, all.rank=TRUE)
 
 mpi_cat("\noutput:\n", quiet=TRUE)
-mpi_print(out, all.rank=ar)
+mpi_print(out)
 
 finalize()
