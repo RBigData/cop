@@ -3,6 +3,7 @@ qr_reducer = function(x, root, comm=0L, type)
 {
   check_is_matrix(x, comm)
   check_common_matrix_dims(x, comm)
+  check_is_int(root, comm)
   type = comm.match.arg(tolower(type), TYPES_STR, comm=comm)
   type_int = type_str2int(type)
   
