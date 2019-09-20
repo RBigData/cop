@@ -13,12 +13,12 @@ if (comm.rank() == 0){
   for (i in seq.int(comm.size()-1)+1){
     R_i = qr.R(qr(rbind(R_i, x_g[[i]]), LAPACK=TRUE))
   }
-  test = all.equal(R_ar, R_i)
+  test = all.equal(abs(R_ar), abs(R_i))
   print(test)
   
   x_all = do.call(rbind, x_g)
   R = qr.R(qr(x_all, LAPACK=TRUE))
-  test = all.equal(R_ar, R)
+  test = all.equal(abs(R_ar), abs(R))
   print(test)
 }
 
