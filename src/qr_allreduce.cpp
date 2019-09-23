@@ -8,20 +8,16 @@
 #include "lapack.hpp"
 #include "utils.h"
 
-
-
-int m, n, minmn;
-int mtb;
-size_t copylen;
-int lwork;
-int *pivot;
+int _m, _n, _minmn, _mtb;
+size_t _copylen;
+int _lwork;
+int *_pivot;
 template <typename REAL>
-REAL *tallboy;
+REAL *_tallboy;
 template <typename REAL>
-REAL *work;
+REAL *_work;
 template <typename REAL>
-REAL *qraux;
-
+REAL *_qraux;
 
 
 template <typename T, typename S>
@@ -49,10 +45,10 @@ static inline void FREE(void *x)
 template <typename REAL>
 void qr_global_cleanup()
 {
-  FREE(tallboy<REAL>);
-  FREE(work<REAL>);
-  FREE(qraux<REAL>);
-  FREE(pivot);
+  FREE(_tallboy<REAL>);
+  FREE(_work<REAL>);
+  FREE(_qraux<REAL>);
+  FREE(_pivot);
 }
 
 
@@ -69,21 +65,21 @@ static inline int qr_worksize(const int m, const int n)
 }
 
 template <typename REAL>
-void qr_global_init(int _m, int _n)
+void qr_global_init(int m, int n)
 {
-  m = _m;
-  n = _n;
-  minmn = std::min(m, n);
-  mtb = 2*m;
-  copylen = (size_t) m*n * sizeof(REAL);
+  _m = m;
+  _n = n;
+  _minmn = std::min(_m, _n);
+  _mtb = 2*_m;
+  _copylen = (size_t) _m*_n * sizeof(REAL);
   
-  tallboy<REAL> = (REAL*) malloc(mtb*n * sizeof(REAL));
-  lwork = qr_worksize(mtb, n);
-  work<REAL> = (REAL*) malloc(lwork * sizeof(REAL));
-  qraux<REAL> = (REAL*) malloc(minmn * sizeof(REAL));
-  pivot = (int*) malloc(n * sizeof(REAL));
+  _tallboy<REAL> = (REAL*) malloc(_mtb*_n * sizeof(REAL));
+  _lwork = qr_worksize(_mtb, _n);
+  _work<REAL> = (REAL*) malloc(_lwork * sizeof(REAL));
+  _qraux<REAL> = (REAL*) malloc(_minmn * sizeof(REAL));
+  _pivot = (int*) malloc(_n * sizeof(REAL));
   
-  if (tallboy<REAL> == NULL || work<REAL> == NULL || qraux<REAL> == NULL || pivot == NULL)
+  if (_tallboy<REAL> == NULL || _work<REAL> == NULL || _qraux<REAL> == NULL || _pivot == NULL)
   {
     qr_global_cleanup<REAL>();
     error("OOM");
@@ -93,37 +89,35 @@ void qr_global_init(int _m, int _n)
 
 
 template <typename REAL>
-void custom_op_qr(void *_a, void *_b, int *len, MPI_Datatype *dtype)
+void custom_op_qr(void *a_, void *b_, int *len, MPI_Datatype *dtype)
 {
   (void)len;
   (void)dtype;
   
-  REAL *a = (REAL*)_a;
-  REAL *b = (REAL*)_b;
+  REAL *a = (REAL*)a_;
+  REAL *b = (REAL*)b_;
   
-  #pragma omp parallel for default(shared) if(m*n > OMP_MIN_SIZE)
-  for (int j=0; j<n; j++)
+  #pragma omp parallel for default(shared) if(_m*_n > OMP_MIN_SIZE)
+  for (int j=0; j<_n; j++)
   {
-    // memcpy(tallboy + mtb*j, a + m*j, m*sizeof(REAL));
     #pragma omp simd
-    for (int i=0; i<m; i++)
-      tallboy<REAL>[i + mtb*j] = a[i + m*j];
+    for (int i=0; i<_m; i++)
+      _tallboy<REAL>[i + _mtb*j] = a[i + _m*j];
     
-    // memcpy(tallboy + m + mtb*j, b + m*j, m*sizeof(REAL));
     #pragma omp simd
-    for (int i=0; i<m; i++)
-      tallboy<REAL>[m+i + mtb*j] = b[i + m*j];
+    for (int i=0; i<_m; i++)
+      _tallboy<REAL>[_m+i + _mtb*j] = b[i + _m*j];
   }
   
   int info = 0;
-  lapack::geqp3(mtb, n, tallboy<REAL>, pivot, qraux<REAL>, work<REAL>, lwork, &info);
+  lapack::geqp3(_mtb, _n, _tallboy<REAL>, _pivot, _qraux<REAL>, _work<REAL>, _lwork, &info);
   
-  memset(b, 0, copylen);
-  for (int j=0; j<n; j++)
+  memset(b, 0, _copylen);
+  for (int j=0; j<_n; j++)
   {
     #pragma omp for simd
     for (int i=0; i<=j; i++)
-      b[i + m*j] = tallboy<REAL>[i + mtb*j];
+      b[i + _m*j] = _tallboy<REAL>[i + _mtb*j];
   }
 }
 
@@ -137,7 +131,7 @@ int qr_allreduce(const int root, const REAL *const restrict a,
   
   // custom data type
   MPI_Datatype mat_type;
-  MPI_Type_contiguous(m*n, dt, &mat_type);
+  MPI_Type_contiguous(_m*_n, dt, &mat_type);
   MPI_Type_commit(&mat_type);
   
   // custom op + reduce
@@ -164,8 +158,8 @@ extern "C" SEXP cop_allreduce_mat_qr(SEXP send_data, SEXP R_comm, SEXP root_, SE
   int ret;
   MPI_Comm comm = get_mpi_comm_from_Robj(R_comm);
   
-  const int _m = nrows(send_data);
-  const int _n = ncols(send_data);
+  const int m = nrows(send_data);
+  const int n = ncols(send_data);
   
   const int root = INTEGER(root_)[0];
   int rank;
@@ -175,9 +169,9 @@ extern "C" SEXP cop_allreduce_mat_qr(SEXP send_data, SEXP R_comm, SEXP root_, SE
   
   if (INTEGER(type)[0] == TYPE_DOUBLE)
   {
-    PROTECT(recv_data = allocMatrix(REALSXP, _m, _n));
+    PROTECT(recv_data = allocMatrix(REALSXP, m, n));
     
-    qr_global_init<double>(_m, _n);
+    qr_global_init<double>(m, n);
     ret = qr_allreduce(root, REAL(send_data), REAL(recv_data), MPI_DOUBLE, comm);
     qr_global_cleanup<double>();
   }
@@ -187,12 +181,12 @@ extern "C" SEXP cop_allreduce_mat_qr(SEXP send_data, SEXP R_comm, SEXP root_, SE
     float *recv_data_f = (float*) malloc(m*n*sizeof(*recv_data_f));
     floatconv(m, n, REAL(send_data), send_data_f);
     
-    qr_global_init<float>(_m, _n);
+    qr_global_init<float>(m, n);
     ret = qr_allreduce(root, send_data_f, recv_data_f, MPI_FLOAT, comm);
     qr_global_cleanup<float>();
     
     free(send_data_f);
-    PROTECT(recv_data = allocMatrix(REALSXP, _m, _n));
+    PROTECT(recv_data = allocMatrix(REALSXP, m, n));
     if (root == REDUCE_TO_ALL || root == rank)
       floatconv(m, n, recv_data_f, REAL(recv_data));
     free(recv_data_f);

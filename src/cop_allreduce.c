@@ -4,18 +4,12 @@
 #include "defs.h"
 #include "utils.h"
 
-SEXP R_env;
-SEXP R_fcall;
-SEXP send_data_cp;
-SEXP recv_data_cp;
+SEXP _R_env;
+SEXP _R_fcall;
+SEXP _send_data_cp;
+SEXP _recv_data_cp;
 
-
-// ----------------------------------------------------------------------------
-// matrix ops
-// ----------------------------------------------------------------------------
-
-size_t copy_len;
-
+size_t _copylen;
 
 
 static void custom_op_matrix(double *a, double *b, int *len, MPI_Datatype *dtype)
@@ -25,15 +19,12 @@ static void custom_op_matrix(double *a, double *b, int *len, MPI_Datatype *dtype
   (void)len;
   (void)dtype;
   
-  // for testing
-  // for (int i=0; i<4; i++) b[i] += a[i];
-  
-  memcpy(REAL(send_data_cp), a, copy_len);
-  memcpy(REAL(recv_data_cp), b, copy_len);
+  memcpy(REAL(_send_data_cp), a, _copylen);
+  memcpy(REAL(_recv_data_cp), b, _copylen);
   
   SEXP lhs;
-  PROTECT(lhs = eval(R_fcall, R_env));
-  memcpy(b, REAL(lhs), copy_len);
+  PROTECT(lhs = eval(_R_fcall, _R_env));
+  memcpy(b, REAL(lhs), _copylen);
   
   UNPROTECT(1);
 }
@@ -48,17 +39,17 @@ SEXP cop_allreduce_mat_userop(SEXP send_data, SEXP R_comm, SEXP root,
   // data setup
   const int m = nrows(send_data);
   const int n = ncols(send_data);
-  copy_len = (size_t) m*n*sizeof(double);
+  _copylen = (size_t) m*n*sizeof(double);
   
   SEXP recv_data;
   PROTECT(recv_data = allocMatrix(REALSXP, m, n));
-  recv_data_cp = recv_data;
+  _recv_data_cp = recv_data;
   
-  PROTECT(send_data_cp = allocMatrix(REALSXP, m, n));
-  memcpy(REAL(send_data_cp), REAL(send_data), copy_len);
+  PROTECT(_send_data_cp = allocMatrix(REALSXP, m, n));
+  memcpy(REAL(_send_data_cp), REAL(send_data), _copylen);
   
-  PROTECT(R_env = env);
-  PROTECT(R_fcall = lang3(fun, send_data_cp, recv_data));
+  PROTECT(_R_env = env);
+  PROTECT(_R_fcall = lang3(fun, _send_data_cp, recv_data));
   
   // custom data type
   MPI_Datatype mat_type;
@@ -70,9 +61,9 @@ SEXP cop_allreduce_mat_userop(SEXP send_data, SEXP R_comm, SEXP root,
   MPI_Op_create((MPI_User_function*) custom_op_matrix, LOGICAL(commutative)[0], &op);
   int ret;
   if (INTEGER(root)[0] == REDUCE_TO_ALL)
-    ret = MPI_Allreduce(REAL(send_data_cp), REAL(recv_data), 1, mat_type, op, comm);
+    ret = MPI_Allreduce(REAL(_send_data_cp), REAL(recv_data), 1, mat_type, op, comm);
   else
-    ret = MPI_Reduce(REAL(send_data_cp), REAL(recv_data), 1, mat_type, op, INTEGER(root)[0], comm);
+    ret = MPI_Reduce(REAL(_send_data_cp), REAL(recv_data), 1, mat_type, op, INTEGER(root)[0], comm);
   check_MPI_ret(ret);
   
   // cleanup and return
