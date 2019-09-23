@@ -12,6 +12,16 @@ extern "C" void dgeqp3_(const int *const m, const int *const n,
   double *const restrict tau, double *const restrict work,
   const int *const restrict lwork, int *const restrict info);
 
+extern "C" void sgeqrf_(const int *const m, const int *const n,
+  float *const restrict A, const int *const lda, float *const restrict tau,
+  float *const restrict work, const int *const restrict lwork,
+  int *const restrict info);
+
+extern "C" void dgeqrf_(const int *const m, const int *const n,
+  double *const restrict A, const int *const lda, double *const restrict tau,
+  double *const restrict work, const int *const restrict lwork,
+  int *const restrict info);
+
 
 namespace lapack
 {
@@ -27,6 +37,20 @@ namespace lapack
     double *const restrict work, const int lwork, int *const restrict info)
   {
     dgeqp3_(&m, &n, x, &m, pivot, qraux, work, &lwork, info);
+  }
+  
+  inline void geqrf(const int m, const int n, float *const restrict x,
+    float *const restrict tau, float *const restrict work, const int lwork,
+    int *const restrict info)
+  {
+    sgeqrf_(&m, &n, x, &m, tau, work, &lwork, info);
+  }
+  
+  inline void geqrf(const int m, const int n, double *const restrict x,
+    double *const restrict tau, double *const restrict work, const int lwork,
+    int *const restrict info)
+  {
+    dgeqrf_(&m, &n, x, &m, tau, work, &lwork, info);
   }
 }
 
