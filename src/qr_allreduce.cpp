@@ -21,14 +21,14 @@ REAL *_qraux;
 bool _badinfo;
 
 
-template <typename T, typename S>
-void floatconv(const int nr, const int nc, const T *src, S *dst)
+template <typename SRC, typename DST>
+void floatconv(const int nr, const int nc, const SRC *src, DST *dst)
 {
   for (int j=0; j<nc; j++)
   {
     #pragma omp for simd
     for (int i=0; i<nr; i++)
-      dst[i + nr*j] = (S) src[i + nr*j];
+      dst[i + nr*j] = (DST) src[i + nr*j];
   }
 }
 
@@ -163,7 +163,8 @@ int qr_allreduce(const int root, const REAL *const restrict a,
 
 
 
-extern "C" SEXP cop_allreduce_mat_qr(SEXP send_data, SEXP R_comm, SEXP root_, SEXP type)
+extern "C" SEXP cop_allreduce_mat_qr(SEXP send_data, SEXP R_comm, SEXP root_,
+  SEXP type)
 {
   int ret;
   MPI_Comm comm = get_mpi_comm_from_Robj(R_comm);
