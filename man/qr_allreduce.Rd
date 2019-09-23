@@ -57,3 +57,6 @@ finalize()
 }
 
 }
+\seealso{
+\code{\link{cop_allreduce}()}
+}
