@@ -7,7 +7,7 @@
 \usage{
 qr_allreduce(x, comm = 0L, type = "double")
 
-qr_reduce(x, root = 0, comm = 0L, type = "double")
+qr_reduce(x, root = 0L, comm = 0L, type = "double")
 }
 \arguments{
 \item{x}{The input data. Should be a numeric matrix. The matrix should be the same

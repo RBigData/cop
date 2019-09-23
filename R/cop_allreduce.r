@@ -105,7 +105,7 @@ cop_allreduce = function(x, op, commutative=FALSE, comm=0L)
 
 #' @rdname cop_allreduce
 #' @export
-cop_reduce = function(x, op, root, commutative=FALSE, comm=0L)
+cop_reduce = function(x, op, root=0L, commutative=FALSE, comm=0L)
 {
   reducer(x=x, op=op, commutative=commutative, root=root, comm=comm)
 }

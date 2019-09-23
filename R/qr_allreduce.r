@@ -89,7 +89,7 @@ qr_allreduce = function(x, comm=0L, type="double")
 
 #' @rdname qr_allreduce
 #' @export
-qr_reduce = function(x, root=0, comm=0L, type="double")
+qr_reduce = function(x, root=0L, comm=0L, type="double")
 {
   qr_reducer(x, root=root, comm=comm, type=type)
 }

@@ -7,7 +7,7 @@
 \usage{
 cop_allreduce(x, op, commutative = FALSE, comm = 0L)
 
-cop_reduce(x, op, root, commutative = FALSE, comm = 0L)
+cop_reduce(x, op, root = 0L, commutative = FALSE, comm = 0L)
 }
 \arguments{
 \item{x}{The input data. Should be a numeric matrix. The matrix should be the same
