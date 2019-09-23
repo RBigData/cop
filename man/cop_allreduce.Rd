@@ -2,7 +2,13 @@
 % Please edit documentation in R/cop_allreduce.r
 \name{cop_allreduce}
 \alias{cop_allreduce}
+\alias{cop_reduce}
 \title{Custom Reduction}
+\usage{
+cop_allreduce(x, op, commutative = FALSE, comm = 0L)
+
+cop_reduce(x, op, root, commutative = FALSE, comm = 0L)
+}
 \arguments{
 \item{x}{The input data. Should be a numeric matrix. The matrix should be the same
 dimensions across all processes.}

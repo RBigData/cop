@@ -96,12 +96,14 @@ NULL
 
 
 
+#' @rdname cop_allreduce
 #' @export
 cop_allreduce = function(x, op, commutative=FALSE, comm=0L)
 {
   reducer(x=x, op=op, commutative=commutative, root=REDUCE_TO_ALL, comm=comm)
 }
 
+#' @rdname cop_allreduce
 #' @export
 cop_reduce = function(x, op, root, commutative=FALSE, comm=0L)
 {
