@@ -15,11 +15,7 @@ qr_reducer = function(x, root, comm=0L, type)
   comm = as.integer(comm)
   comm_ptr = pbdMPI::get.mpi.comm.ptr(comm)
   
-  if (comm.size(comm=comm) == 1)
-    ret = qr.R(qr(x, LAPACK=TRUE))
-  else
-    ret = .Call(cop_allreduce_mat_qr, x, comm_ptr, root, type_int)
-  
+  ret = .Call(cop_allreduce_mat_qr, x, comm_ptr, root, type_int)
   ret
 }
 
