@@ -60,7 +60,8 @@ static inline int qr_worksize(const int m, const int n)
   REAL tmp;
   
   int info;
-  lapack::geqp3(m, n, NULL, NULL, NULL, &tmp, -1, &info);
+  // lapack::geqp3(m, n, NULL, NULL, NULL, &tmp, -1, &info);
+  lapack::geqrf(m, n, NULL, NULL, &tmp, -1, &info);
   int lwork = (int) tmp;
   
   return std::max(lwork, 1);
@@ -114,11 +115,11 @@ void custom_op_qr(void *a_, void *b_, int *len, MPI_Datatype *dtype)
   }
   
   int info = 0;
-  lapack::geqp3(_mtb, _n, _tallboy<REAL>, _pivot, _qraux<REAL>, _work<REAL>, _lwork, &info);
+  // lapack::geqp3(_mtb, _n, _tallboy<REAL>, _pivot, _qraux<REAL>, _work<REAL>, _lwork, &info);
+  lapack::geqrf(_mtb, _n, _tallboy<REAL>, _qraux<REAL>, _work<REAL>, _lwork, &info);
   if (info != 0)
     _badinfo = true;
   
-  // memset(b, 0, _copylen);
   for (int j=0; j<_n; j++)
   {
     #pragma omp for simd
