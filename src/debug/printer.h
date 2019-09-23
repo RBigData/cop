@@ -1,5 +1,5 @@
-#ifndef COP_UTILS_H
-#define COP_UTILS_H
+#ifndef COP_DEBUG_PRINTER_H
+#define COP_DEBUG_PRINTER_H
 
 
 #include <stdio.h>
