@@ -7,20 +7,18 @@
 SEXP _R_env;
 SEXP _R_fcall;
 SEXP _send_data_cp;
-SEXP _recv_data_cp;
+SEXP _recv_data;
 
 size_t _copylen;
 
 
 static void custom_op_matrix(double *a, double *b, int *len, MPI_Datatype *dtype)
 {
-  (void)a;
-  (void)b;
   (void)len;
   (void)dtype;
   
   memcpy(REAL(_send_data_cp), a, _copylen);
-  memcpy(REAL(_recv_data_cp), b, _copylen);
+  memcpy(REAL(_recv_data), b, _copylen);
   
   SEXP lhs;
   PROTECT(lhs = eval(_R_fcall, _R_env));
@@ -45,15 +43,13 @@ SEXP cop_allreduce_mat_userop(SEXP send_data, SEXP R_comm, SEXP root_,
   int rank;
   MPI_Comm_rank(comm, &rank);
   
-  SEXP recv_data;
-  PROTECT(recv_data = allocMatrix(REALSXP, m, n));
-  _recv_data_cp = recv_data;
+  PROTECT(_recv_data = allocMatrix(REALSXP, m, n));
   
   PROTECT(_send_data_cp = allocMatrix(REALSXP, m, n));
   memcpy(REAL(_send_data_cp), REAL(send_data), _copylen);
   
   PROTECT(_R_env = env);
-  PROTECT(_R_fcall = lang3(fun, _send_data_cp, recv_data));
+  PROTECT(_R_fcall = lang3(fun, _send_data_cp, _recv_data));
   
   // custom data type
   MPI_Datatype mat_type;
@@ -65,9 +61,10 @@ SEXP cop_allreduce_mat_userop(SEXP send_data, SEXP R_comm, SEXP root_,
   MPI_Op_create((MPI_User_function*) custom_op_matrix, LOGICAL(commutative)[0], &op);
   int ret;
   if (root == REDUCE_TO_ALL)
-    ret = MPI_Allreduce(REAL(_send_data_cp), REAL(recv_data), 1, mat_type, op, comm);
+    ret = MPI_Allreduce(REAL(_send_data_cp), REAL(_recv_data), 1, mat_type, op, comm);
   else
-    ret = MPI_Reduce(REAL(_send_data_cp), REAL(recv_data), 1, mat_type, op, root, comm);
+    ret = MPI_Reduce(REAL(_send_data_cp), REAL(_recv_data), 1, mat_type, op, root, comm);
+  
   check_MPI_ret(ret);
   
   // cleanup and return
@@ -76,7 +73,7 @@ SEXP cop_allreduce_mat_userop(SEXP send_data, SEXP R_comm, SEXP root_,
   
   UNPROTECT(4);
   if (root == REDUCE_TO_ALL || root == rank)
-    return recv_data;
+    return _recv_data;
   else
     return R_NilValue;
 }
