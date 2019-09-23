@@ -113,12 +113,16 @@ void custom_op_qr(void *a_, void *b_, int *len, MPI_Datatype *dtype)
   int info = 0;
   lapack::geqp3(_mtb, _n, _tallboy<REAL>, _pivot, _qraux<REAL>, _work<REAL>, _lwork, &info);
   
-  memset(b, 0, _copylen);
+  // memset(b, 0, _copylen);
   for (int j=0; j<_n; j++)
   {
     #pragma omp for simd
     for (int i=0; i<=j; i++)
       b[i + _m*j] = _tallboy<REAL>[i + _mtb*j];
+    
+    #pragma omp for simd
+    for (int i=j+1; i<_m; i++)
+      b[i + _m*j] = (REAL) 0.f;
   }
 }
 
