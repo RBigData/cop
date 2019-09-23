@@ -7,6 +7,7 @@
 SEXP R_env;
 SEXP R_fcall;
 SEXP send_data_cp;
+SEXP recv_data_cp;
 
 
 // ----------------------------------------------------------------------------
@@ -28,6 +29,7 @@ static void custom_op_matrix(double *a, double *b, int *len, MPI_Datatype *dtype
   // for (int i=0; i<4; i++) b[i] += a[i];
   
   memcpy(REAL(send_data_cp), a, copy_len);
+  memcpy(REAL(recv_data_cp), b, copy_len);
   
   SEXP lhs;
   PROTECT(lhs = eval(R_fcall, R_env));
@@ -50,6 +52,7 @@ SEXP cop_allreduce_mat_userop(SEXP send_data, SEXP R_comm, SEXP root,
   
   SEXP recv_data;
   PROTECT(recv_data = allocMatrix(REALSXP, m, n));
+  recv_data_cp = recv_data;
   
   PROTECT(send_data_cp = allocMatrix(REALSXP, m, n));
   memcpy(REAL(send_data_cp), REAL(send_data), copy_len);
@@ -76,6 +79,6 @@ SEXP cop_allreduce_mat_userop(SEXP send_data, SEXP R_comm, SEXP root,
   MPI_Op_free(&op);
   MPI_Type_free(&mat_type);
   
-  UNPROTECT(3);
+  UNPROTECT(4);
   return(recv_data);
 }
