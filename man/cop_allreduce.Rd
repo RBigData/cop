@@ -35,7 +35,7 @@ operation. Currently, only normal dense/numeric matrices are supported.
 This is a generalization of the \code{qr_allreduce()}/\code{qr_reduce()}
 methods also offered by this package. Conceptually, \code{qr_reduce()} is the
 same as doing \code{cop_reduce()} with
-\code{op = function(a, b) qr.R(qr(a, b))} and \code{commutative=TRUE},
+\code{op = function(a, b) qr.R(qr(rbind(a, b)))} and \code{commutative=TRUE},
 although the internals of \code{qr_reduce()} are actually quite different.
 In general, it should be faster and use  less memory.
 
