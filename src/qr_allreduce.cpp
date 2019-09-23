@@ -53,9 +53,10 @@ void qr_global_cleanup()
 
 
 
+template <typename REAL>
 static inline int qr_worksize(const int m, const int n)
 {
-  double tmp;
+  REAL tmp;
   
   int info;
   lapack::geqp3(m, n, NULL, NULL, NULL, &tmp, -1, &info);
@@ -74,7 +75,7 @@ void qr_global_init(int m, int n)
   _copylen = (size_t) _m*_n * sizeof(REAL);
   
   _tallboy<REAL> = (REAL*) malloc(_mtb*_n * sizeof(REAL));
-  _lwork = qr_worksize(_mtb, _n);
+  _lwork = qr_worksize<REAL>(_mtb, _n);
   _work<REAL> = (REAL*) malloc(_lwork * sizeof(REAL));
   _qraux<REAL> = (REAL*) malloc(_minmn * sizeof(REAL));
   _pivot = (int*) malloc(_n * sizeof(REAL));
