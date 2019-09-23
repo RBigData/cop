@@ -72,6 +72,8 @@ qr_reducer = function(x, root, comm=0L, type)
 #' finalize()
 #' }
 #' 
+#' @seealso \code{\link{cop_allreduce}()}
+#' 
 #' @name qr_allreduce
 #' @rdname qr_allreduce
 NULL
