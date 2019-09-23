@@ -18,6 +18,7 @@ template <typename REAL>
 REAL *_work;
 template <typename REAL>
 REAL *_qraux;
+bool _badinfo;
 
 
 template <typename T, typename S>
@@ -74,6 +75,8 @@ void qr_global_init(int m, int n)
   _mtb = 2*_m;
   _copylen = (size_t) _m*_n * sizeof(REAL);
   
+  _badinfo = false;
+  
   _tallboy<REAL> = (REAL*) malloc(_mtb*_n * sizeof(REAL));
   _lwork = qr_worksize<REAL>(_mtb, _n);
   _work<REAL> = (REAL*) malloc(_lwork * sizeof(REAL));
@@ -112,6 +115,8 @@ void custom_op_qr(void *a_, void *b_, int *len, MPI_Datatype *dtype)
   
   int info = 0;
   lapack::geqp3(_mtb, _n, _tallboy<REAL>, _pivot, _qraux<REAL>, _work<REAL>, _lwork, &info);
+  if (info != 0)
+    _badinfo = true;
   
   // memset(b, 0, _copylen);
   for (int j=0; j<_n; j++)
@@ -198,6 +203,8 @@ extern "C" SEXP cop_allreduce_mat_qr(SEXP send_data, SEXP R_comm, SEXP root_, SE
   }
   
   check_MPI_ret(ret);
+  if (_badinfo)
+    error("unrecoverable error with LAPACK function geqp3() occurred during reduction");
   
   UNPROTECT(1);
   if (root == REDUCE_TO_ALL || root == rank)
