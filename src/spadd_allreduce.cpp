@@ -17,6 +17,21 @@ static inline index_t* spmat_I(spmat &s){return (index_t*) s.innerIndexPtr();}
 static inline index_t* spmat_P(spmat &s){return (index_t*) s.outerIndexPtr();}
 
 
+template <typename T>
+void arrcopy(const index_t len, const T *src, T *dst)
+{
+  std::memcpy(dst, src, len*sizeof(*src));
+}
+
+template <typename SRC, typename DST>
+void arrcopy(const index_t len, const SRC *src, DST *dst)
+{
+  #pragma omp for simd
+  for (index_t i=0; i<len; i++)
+    dst[i] = (DST) src[i];
+}
+
+
 
 extern "C" SEXP cop_allreduce_spmat_add(SEXP send_data_s4, SEXP R_comm)
 {
