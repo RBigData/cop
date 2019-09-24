@@ -167,7 +167,7 @@ int qr_allreduce(const int root, const REAL *const restrict a,
 extern "C" SEXP cop_allreduce_mat_qr(SEXP send_data, SEXP R_comm, SEXP root_,
   SEXP type)
 {
-  int ret;
+  int mpi_ret;
   MPI_Comm comm = get_mpi_comm_from_Robj(R_comm);
   
   const int m = nrows(send_data);
@@ -184,7 +184,7 @@ extern "C" SEXP cop_allreduce_mat_qr(SEXP send_data, SEXP R_comm, SEXP root_,
     PROTECT(recv_data = allocMatrix(REALSXP, m, n));
     
     qr_global_init<double>(m, n);
-    ret = qr_allreduce(root, REAL(send_data), REAL(recv_data), MPI_DOUBLE, comm);
+    mpi_ret = qr_allreduce(root, REAL(send_data), REAL(recv_data), MPI_DOUBLE, comm);
     qr_global_cleanup<double>();
   }
   else // if (INTEGER(type)[0] == TYPE_FLOAT)
@@ -194,7 +194,7 @@ extern "C" SEXP cop_allreduce_mat_qr(SEXP send_data, SEXP R_comm, SEXP root_,
     floatconv(m, n, REAL(send_data), send_data_f);
     
     qr_global_init<float>(m, n);
-    ret = qr_allreduce(root, send_data_f, recv_data_f, MPI_FLOAT, comm);
+    mpi_ret = qr_allreduce(root, send_data_f, recv_data_f, MPI_FLOAT, comm);
     qr_global_cleanup<float>();
     
     free(send_data_f);
@@ -204,7 +204,7 @@ extern "C" SEXP cop_allreduce_mat_qr(SEXP send_data, SEXP R_comm, SEXP root_,
     free(recv_data_f);
   }
   
-  check_MPI_ret(ret);
+  check_MPI_ret(mpi_ret);
   if (_badinfo)
     error("unrecoverable error with LAPACK function geqp3() occurred during reduction");
   
