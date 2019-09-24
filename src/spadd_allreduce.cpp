@@ -60,6 +60,51 @@ static inline spmat s4_to_spmat(SEXP s4)
 
 
 
+static inline SEXP spmat_to_s4(spmat &s)
+{
+  SEXP s4_class, s4;
+  SEXP s4_i, s4_p, s4_Dim, s4_Dimnames, s4_x, s4_factors;
+  
+  const index_t m = s.rows();
+  const index_t n = s.cols();
+  const index_t nnz = s.nonZeros();
+  const index_t p_len = s.outerSize();
+  
+  PROTECT(s4_i = allocVector(INTSXP, nnz));
+  arrcopy(nnz, spmat_I(s), INTEGER(s4_i));
+  
+  PROTECT(s4_p = allocVector(INTSXP, p_len+1));
+  arrcopy(p_len, spmat_P(s), INTEGER(s4_p));
+  INTEGER(s4_p)[p_len] = nnz;
+  
+  PROTECT(s4_Dim = allocVector(INTSXP, 2));
+  INTEGER(s4_Dim)[0] = (int) m;
+  INTEGER(s4_Dim)[1] = (int) n;
+  
+  PROTECT(s4_Dimnames = allocVector(VECSXP, 2));
+  SET_VECTOR_ELT(s4_Dimnames, 0, R_NilValue);
+  SET_VECTOR_ELT(s4_Dimnames, 1, R_NilValue);
+  
+  PROTECT(s4_x = allocVector(REALSXP, nnz));
+  arrcopy(nnz, spmat_X(s), REAL(s4_x));
+  
+  PROTECT(s4_factors = allocVector(VECSXP, 0));
+  
+  PROTECT(s4_class = MAKE_CLASS("dgCMatrix"));
+  PROTECT(s4 = NEW_OBJECT(s4_class));
+  SET_SLOT(s4, install("i"), s4_i);
+  SET_SLOT(s4, install("p"), s4_p);
+  SET_SLOT(s4, install("Dim"), s4_Dim);
+  SET_SLOT(s4, install("Dimnames"), s4_Dimnames);
+  SET_SLOT(s4, install("x"), s4_x);
+  SET_SLOT(s4, install("factors"), s4_factors);
+  
+  UNPROTECT(8);
+  return s4;
+}
+
+
+
 extern "C" SEXP cop_allreduce_spmat_add(SEXP send_data_s4, SEXP R_comm)
 {
   MPI_Comm comm = get_mpi_comm_from_Robj(R_comm);
@@ -67,5 +112,8 @@ extern "C" SEXP cop_allreduce_spmat_add(SEXP send_data_s4, SEXP R_comm)
   spmat send_data = s4_to_spmat(send_data_s4);
   std::cout << send_data << std::endl;
   
-  return R_NilValue;
+  SEXP ret;
+  PROTECT(ret = spmat_to_s4(send_data));
+  UNPROTECT(1);
+  return ret;
 }
