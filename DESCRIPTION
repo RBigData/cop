@@ -11,6 +11,7 @@ Imports:
     utils,
     float (>= 0.2-0)
 LinkingTo:
+    RcppEigen,
     float (>= 0.2-0)
 SystemRequirements: C++14
 ByteCompile: yes
