@@ -27,7 +27,7 @@ printer = function(printfun, x, quiet=FALSE, all.rank=FALSE, comm=0L)
         rankcat(rank, quiet)
         cat(rankmsg)
       }
-      else
+      else if (myrank == rank)
       {
         cx = paste(capture.output(printfun(x)), "\n", collapse="")
         pbdMPI::spmd.send.integer(nchar(cx), rank.dest=0, comm=comm)

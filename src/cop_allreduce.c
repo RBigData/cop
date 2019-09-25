@@ -8,6 +8,7 @@ SEXP _R_env;
 SEXP _R_fcall;
 SEXP _send_data_cp;
 SEXP _recv_data;
+SEXP lhs;
 
 size_t _copylen;
 
@@ -19,11 +20,8 @@ static void custom_op_matrix(double *a, double *b, int *len, MPI_Datatype *dtype
   
   memcpy(REAL(_send_data_cp), a, _copylen);
   memcpy(REAL(_recv_data), b, _copylen);
-  
-  SEXP lhs;
   PROTECT(lhs = eval(_R_fcall, _R_env));
   memcpy(b, REAL(lhs), _copylen);
-  
   UNPROTECT(1);
 }
 
@@ -38,16 +36,17 @@ SEXP cop_allreduce_mat_userop(SEXP send_data, SEXP R_comm, SEXP root_,
   const int m = nrows(send_data);
   const int n = ncols(send_data);
   _copylen = (size_t) m*n*sizeof(double);
+
+  double *_a_cp = (double*) R_alloc(m*n, sizeof(double));
+  double *_b_cp = (double*) R_alloc(m*n, sizeof(double));
+  memcpy(_a_cp, REAL(send_data), _copylen);
   
   const int root = INTEGER(root_)[0];
   int rank;
   MPI_Comm_rank(comm, &rank);
   
   PROTECT(_recv_data = allocMatrix(REALSXP, m, n));
-  
   PROTECT(_send_data_cp = allocMatrix(REALSXP, m, n));
-  memcpy(REAL(_send_data_cp), REAL(send_data), _copylen);
-  
   PROTECT(_R_env = env);
   PROTECT(_R_fcall = lang3(fun, _send_data_cp, _recv_data));
   
@@ -61,9 +60,9 @@ SEXP cop_allreduce_mat_userop(SEXP send_data, SEXP R_comm, SEXP root_,
   MPI_Op_create((MPI_User_function*) custom_op_matrix, LOGICAL(commutative)[0], &op);
   int ret;
   if (root == REDUCE_TO_ALL)
-    ret = MPI_Allreduce(REAL(_send_data_cp), REAL(_recv_data), 1, mat_type, op, comm);
+    ret = MPI_Allreduce(_a_cp, _b_cp, 1, mat_type, op, comm);
   else
-    ret = MPI_Reduce(REAL(_send_data_cp), REAL(_recv_data), 1, mat_type, op, root, comm);
+    ret = MPI_Reduce(_a_cp, _b_cp, 1, mat_type, op, root, comm);
   
   check_MPI_ret(ret);
   
@@ -71,9 +70,11 @@ SEXP cop_allreduce_mat_userop(SEXP send_data, SEXP R_comm, SEXP root_,
   MPI_Op_free(&op);
   MPI_Type_free(&mat_type);
   
-  UNPROTECT(4);
   if (root == REDUCE_TO_ALL || root == rank)
-    return _recv_data;
+    memcpy(REAL(_recv_data), _b_cp, _copylen);
   else
-    return R_NilValue;
+    _recv_data = R_NilValue;
+
+  UNPROTECT(4);
+  return _recv_data;
 }
