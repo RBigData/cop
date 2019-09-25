@@ -15,9 +15,9 @@ typedef int index_t;
 
 typedef Eigen::SparseMatrix<scalar_t, Eigen::StorageOptions::ColMajor, index_t> spmat;
 
-static inline scalar_t* spmat_X(spmat &s){return (scalar_t*) s.valuePtr();}
-static inline index_t* spmat_I(spmat &s){return (index_t*) s.innerIndexPtr();}
-static inline index_t* spmat_P(spmat &s){return (index_t*) s.outerIndexPtr();}
+static inline scalar_t* spmat_X(spmat &s) {return (scalar_t*) s.valuePtr();}
+static inline  index_t* spmat_I(spmat &s) {return  (index_t*) s.innerIndexPtr();}
+static inline  index_t* spmat_P(spmat &s) {return  (index_t*) s.outerIndexPtr();}
 
 
 template <typename T>
