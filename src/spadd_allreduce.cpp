@@ -9,7 +9,10 @@
 #include "utils.h"
 
 typedef uint32_t scalar_t;
+#define MPI_SCALAR_T MPI_UINT32_T
 typedef int index_t;
+#define MPI_INDEX_T MPI_INT
+
 typedef Eigen::SparseMatrix<scalar_t, Eigen::StorageOptions::ColMajor, index_t> spmat;
 
 static inline scalar_t* spmat_X(spmat &s){return (scalar_t*) s.valuePtr();}
