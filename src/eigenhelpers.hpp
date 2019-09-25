@@ -149,8 +149,8 @@ namespace eigenhelpers
     
     memset(d, 0, m*sizeof(*d));
     
-    index_t start = P[col];
-    index_t end = (col == n) ? nnz : P[col+1];
+    const index_t start = P[col];
+    const index_t end = (col == n) ? nnz : P[col+1];
     for (index_t i=start; i<end; i++)
       d[ I[i] ] = X[i];
   }
