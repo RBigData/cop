@@ -18,6 +18,10 @@ namespace eigenhelpers
   static inline  index_t* spmat_I(spmat &s) {return  (index_t*) s.innerIndexPtr();}
   static inline  index_t* spmat_P(spmat &s) {return  (index_t*) s.outerIndexPtr();}
   
+  static inline const scalar_t* spmat_X(const spmat &s) {return (scalar_t*) s.valuePtr();}
+  static inline const  index_t* spmat_I(const spmat &s) {return  (index_t*) s.innerIndexPtr();}
+  static inline const  index_t* spmat_P(const spmat &s) {return  (index_t*) s.outerIndexPtr();}
+  
   
   template <typename T>
   void arrcopy(const index_t len, const T *src, T *dst)
@@ -103,5 +107,51 @@ namespace eigenhelpers
     
     UNPROTECT(8);
     return s4;
+  }
+  
+  
+  
+  static inline void sparsecol_to_densecol(index_t col, SEXP s, scalar_t *d)
+  {
+    SEXP dim = GET_SLOT(s, install("Dim"));
+    const int m = INTEGER(dim)[0];
+    const int n = INTEGER(dim)[1];
+    
+    SEXP s_X = GET_SLOT(s, install("x"));
+    const double *X = REAL(s_X);
+    const int nnz = LENGTH(s_X);
+    
+    SEXP s_I = GET_SLOT(s, install("i")); // len == nnz
+    const int *I = INTEGER(s_I);
+    
+    SEXP s_P = GET_SLOT(s, install("p"));
+    const int *P = INTEGER(s_P);
+    
+    memset(d, 0, m*sizeof(*d));
+    
+    index_t start = P[col];
+    index_t end = (col == n) ? nnz : P[col+1];
+    for (index_t i=start; i<end; i++)
+      d[ I[i] ] = (scalar_t) X[i];
+  }
+  
+  
+  
+  static inline void sparsecol_to_densecol(index_t col, const spmat &s, scalar_t *d)
+  {
+    const index_t m = s.rows();
+    const index_t n = s.cols();
+    const index_t nnz = s.nonZeros();
+    
+    const scalar_t *X = spmat_X(s);
+    const index_t *I = spmat_I(s);
+    const index_t *P = spmat_P(s);
+    
+    memset(d, 0, m*sizeof(*d));
+    
+    index_t start = P[col];
+    index_t end = (col == n) ? nnz : P[col+1];
+    for (index_t i=start; i<end; i++)
+      d[ I[i] ] = X[i];
   }
 }
