@@ -39,5 +39,11 @@ int main()
   u.add(d, 5);
   u.print();
   
+  
+  int I[2] = {0, 4};
+  int X[2] = {1, 1};
+  u.set(2, I, X);
+  u.print(true);
+  
   return 0;
 }
