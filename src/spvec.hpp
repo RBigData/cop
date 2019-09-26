@@ -194,12 +194,12 @@ int spvec<INDEX, SCALAR>::add(const spvec &x)
   for (int xind=0; xind<x.get_nnz(); xind++)
   {
     const int xi = xI[xind];
-    while (I[ind] < xi)
+    while (ind < nnz && I[ind] < xi)
       ind++;
     
     if (I[ind] == xi)
       X[ind++] += xX[xind];
-    else if (I[ind] > xi)
+    else if (ind == nnz || I[ind] > xi)
       insert_from_ind(ind, xi, xX[xind]);
   }
   
