@@ -22,7 +22,7 @@ class spvec
     
     void print() const;
     bool insert(const INDEX i, const SCALAR s);
-    bool add(const spvec &x);
+    int add(const spvec &x);
     
     int get_nnz() const {return nnz;};
     int get_len() const {return len;};
@@ -166,11 +166,44 @@ bool spvec<INDEX, SCALAR>::insert(const INDEX i, const SCALAR s)
 
 
 
+// TODO return needed size of realloc
 template <typename INDEX, typename SCALAR>
-bool spvec<INDEX, SCALAR>::add(const spvec &x)
+int spvec<INDEX, SCALAR>::add(const spvec &x)
 {
-  // TODO
-  return false;
+  const INDEX *xI = x.index_ptr();
+  const SCALAR *xX = x.data_ptr();
+  int ind = 0;
+  
+  // pre-scan to see if a re-alloc is necessary
+  int num_inserted = 0;
+  for (int xind=0; xind<x.get_nnz(); xind++)
+  {
+    const int xi = xI[xind];
+    while (I[ind] < xi)
+      ind++;
+    
+    if (I[ind] > xi)
+      num_inserted++;
+  }
+  
+  if (num_inserted > (len - nnz))
+    return num_inserted;
+  
+  // 
+  ind = 0;
+  for (int xind=0; xind<x.get_nnz(); xind++)
+  {
+    const int xi = xI[xind];
+    while (I[ind] < xi)
+      ind++;
+    
+    if (I[ind] == xi)
+      X[ind++] += xX[xind];
+    else if (I[ind] > xi)
+      insert_from_ind(ind, xi, xX[xind]);
+  }
+  
+  return 0;
 }
 
 
