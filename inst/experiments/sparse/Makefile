@@ -1,12 +1,10 @@
-EIGENFLAGS := $(shell Rscript -e "RcppEigen:::CxxFlags()")
-
-MPICXX = mpicxx
-CXXFLAGS = -Wall -pedantic -Wextra $(EIGENFLAGS)
+CXX = g++
+CXXFLAGS = -Wall -pedantic -Wextra
 
 all: clean test
 
 test:
-	$(MPICXX) $(CXXFLAGS) test.cpp -o test
+	$(CXX) $(CXXFLAGS) test.cpp -o test
 
 clean:
 	rm -f test
