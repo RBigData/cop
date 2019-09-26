@@ -155,7 +155,22 @@ void spvec<INDEX, SCALAR>::insert(INDEX i, SCALAR s)
     return;
   }
   
-  // TODO
+  int insertion_ind;
+  for (insertion_ind=0; insertion_ind<this->nnz; insertion_ind++)
+  {
+    if (i < this->I[insertion_ind])
+      break;
+  }
+  
+  for (int ind=this->nnz; ind>insertion_ind; ind--)
+  {
+    this->I[ind] = this->I[ind-1];
+    this->X[ind] = this->X[ind-1];
+  }
+  
+  this->I[insertion_ind] = i;
+  this->X[insertion_ind] = s;
+  this->nnz++;
 }
 
 
