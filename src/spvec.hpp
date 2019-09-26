@@ -189,7 +189,7 @@ int spvec<INDEX, SCALAR>::add(const spvec &x)
   if (num_inserted > (len - nnz))
     return num_inserted;
   
-  // 
+  // add the vectors
   ind = 0;
   for (int xind=0; xind<x.get_nnz(); xind++)
   {
