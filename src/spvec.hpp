@@ -46,20 +46,20 @@ class spvec
 template <typename INDEX, typename SCALAR>
 spvec<INDEX, SCALAR>::spvec(int len_)
 {
-  this->I = (INDEX*) std::malloc(len_*sizeof(INDEX));
-  this->X = (SCALAR*) std::malloc(len_*sizeof(SCALAR));
+  I = (INDEX*) std::malloc(len_*sizeof(INDEX));
+  X = (SCALAR*) std::malloc(len_*sizeof(SCALAR));
   
-  if (this->I == NULL || this->X == NULL)
+  if (I == NULL || X == NULL)
   {
-    this->cleanup();
+    cleanup();
     throw std::bad_alloc();
   }
   
-  std::memset(this->I, 0, len_*sizeof(INDEX));
-  std::memset(this->X, 0, len_*sizeof(SCALAR));
+  std::memset(I, 0, len_*sizeof(INDEX));
+  std::memset(X, 0, len_*sizeof(SCALAR));
   
-  this->nnz = 0;
-  this->len = len_;
+  nnz = 0;
+  len = len_;
 }
 
 
@@ -67,7 +67,7 @@ spvec<INDEX, SCALAR>::spvec(int len_)
 template <typename INDEX, typename SCALAR>
 spvec<INDEX, SCALAR>::~spvec()
 {
-  this->cleanup();
+  cleanup();
 }
 
 
@@ -75,21 +75,21 @@ spvec<INDEX, SCALAR>::~spvec()
 template <typename INDEX, typename SCALAR>
 void spvec<INDEX, SCALAR>::resize(int len_)
 {
-  void *realloc_I = realloc(this->I, len_*sizeof(INDEX));
-  void *realloc_X = realloc(this->X, len_*sizeof(SCALAR));
+  void *realloc_I = realloc(I, len_*sizeof(INDEX));
+  void *realloc_X = realloc(X, len_*sizeof(SCALAR));
   
   if (realloc_I == NULL || realloc_X == NULL)
   {
     if (realloc_I) free(realloc_I);
     if (realloc_X) free(realloc_X);
-    this->cleanup();
+    cleanup();
     throw std::bad_alloc();
   }
   
-  this->I = (INDEX*) realloc_I;
-  this->X = (SCALAR*) realloc_X;
+  I = (INDEX*) realloc_I;
+  X = (SCALAR*) realloc_X;
   
-  this->len = len_;
+  len = len_;
 }
 
 
@@ -97,17 +97,17 @@ void spvec<INDEX, SCALAR>::resize(int len_)
 template <typename INDEX, typename SCALAR>
 void spvec<INDEX, SCALAR>::set(int nnz_, INDEX *I_, SCALAR *X_)
 {
-  if (this->len < nnz_)
-    this->resize(nnz_);
-  else if (this->len > nnz_)
+  if (len < nnz_)
+    resize(nnz_);
+  else if (len > nnz_)
   {
-    std::memset(this->I + nnz_, 0, (this->nnz - nnz_)*sizeof(INDEX));
-    std::memset(this->X + nnz_, 0, (this->nnz - nnz_)*sizeof(SCALAR));
+    std::memset(I + nnz_, 0, (nnz - nnz_)*sizeof(INDEX));
+    std::memset(X + nnz_, 0, (nnz - nnz_)*sizeof(SCALAR));
   }
   
-  std::memcpy(this->I, I_, nnz_);
-  std::memcpy(this->X, X_, nnz_);
-  this->nnz = nnz_;
+  std::memcpy(I, I_, nnz_);
+  std::memcpy(X, X_, nnz_);
+  nnz = nnz_;
 }
 
 
@@ -115,9 +115,9 @@ void spvec<INDEX, SCALAR>::set(int nnz_, INDEX *I_, SCALAR *X_)
 template <typename INDEX, typename SCALAR>
 void spvec<INDEX, SCALAR>::zero()
 {
-  std::memset(this->I, 0, this->nnz*sizeof(INDEX));
-  std::memset(this->X, 0, this->nnz*sizeof(SCALAR));
-  this->nnz = 0;
+  std::memset(I, 0, nnz*sizeof(INDEX));
+  std::memset(X, 0, nnz*sizeof(SCALAR));
+  nnz = 0;
 }
 
 
@@ -125,14 +125,14 @@ void spvec<INDEX, SCALAR>::zero()
 template <typename INDEX, typename SCALAR>
 void spvec<INDEX, SCALAR>::print() const
 {
-  printf("## Length %d sparse vector with nnz=%d\n", this->len, this->nnz);
+  printf("## Length %d sparse vector with nnz=%d\n", len, nnz);
   
   int ind_s = 0;
-  for (int ind=0; ind<this->len; ind++)
+  for (int ind=0; ind<len; ind++)
   {
-    if (ind_s < this->nnz && ind == this->I[ind_s])
+    if (ind_s < nnz && ind == I[ind_s])
     {
-      std::cout << this->X[ind_s];
+      std::cout << X[ind_s];
       ind_s++;
     }
     else
@@ -149,13 +149,13 @@ void spvec<INDEX, SCALAR>::print() const
 template <typename INDEX, typename SCALAR>
 bool spvec<INDEX, SCALAR>::insert(const INDEX i, const SCALAR s)
 {
-  if (this->nnz == this->len)
+  if (nnz == len)
     return false;
   
   int insertion_ind;
-  for (insertion_ind=0; insertion_ind<this->nnz; insertion_ind++)
+  for (insertion_ind=0; insertion_ind<nnz; insertion_ind++)
   {
-    if (i < this->I[insertion_ind])
+    if (i < I[insertion_ind])
       break;
   }
   
