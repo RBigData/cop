@@ -101,14 +101,14 @@ void spvec<INDEX, SCALAR>::set(int nnz_, INDEX *I_, SCALAR *X_)
 {
   if (len < nnz_)
     resize(nnz_);
-  else if (len > nnz_)
+  else if (nnz > nnz_)
   {
     std::memset(I + nnz_, 0, (nnz - nnz_)*sizeof(INDEX));
     std::memset(X + nnz_, 0, (nnz - nnz_)*sizeof(SCALAR));
   }
   
-  std::memcpy(I, I_, nnz_);
-  std::memcpy(X, X_, nnz_);
+  std::memcpy(I, I_, nnz_*sizeof(INDEX));
+  std::memcpy(X, X_, nnz_*sizeof(SCALAR));
   nnz = nnz_;
 }
 
