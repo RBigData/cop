@@ -20,7 +20,7 @@ class spvec
     void set(int nnz_, INDEX *I_, SCALAR *X_);
     void zero();
     
-    void print() const;
+    void print(bool actual=false) const;
     int insert(const INDEX i, const SCALAR s);
     int add(const spvec &x);
     int add(const SCALAR *x, const int xlen);
@@ -125,25 +125,39 @@ void spvec<INDEX, SCALAR>::zero()
 
 
 template <typename INDEX, typename SCALAR>
-void spvec<INDEX, SCALAR>::print() const
+void spvec<INDEX, SCALAR>::print(bool actual) const
 {
   printf("## Length %d sparse vector with nnz=%d\n", len, nnz);
   
-  int ind_s = 0;
-  for (int ind=0; ind<len; ind++)
+  if (actual)
   {
-    if (ind_s < nnz && ind == I[ind_s])
-    {
-      std::cout << X[ind_s];
-      ind_s++;
-    }
-    else
-      std::cout << (SCALAR) 0;
+    printf("I: ");
+    for (int ind=0; ind<len; ind++)
+      std::cout << I[ind] << " ";
     
-    std::cout << " ";
+    printf("\nX: ");
+    for (int ind=0; ind<len; ind++)
+      std::cout << X[ind] << " ";
+    putchar('\n');
   }
-  
-  std::cout << std::endl;
+  else
+  {
+    int ind_s = 0;
+    for (int ind=0; ind<len; ind++)
+    {
+      if (ind_s < nnz && ind == I[ind_s])
+      {
+        std::cout << X[ind_s];
+        ind_s++;
+      }
+      else
+        std::cout << (SCALAR) 0;
+      
+      std::cout << " ";
+    }
+    
+    std::cout << std::endl;
+  }
 }
 
 
