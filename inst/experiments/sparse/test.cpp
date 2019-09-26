@@ -12,7 +12,7 @@ int main()
   u.insert(2, 3);
   u.print();
   
-  spvec<int, int> v(5);
+  spvec<int, int> v(7);
   v.insert(0, 1);
   v.insert(2, 1);
   v.insert(3, 1);
@@ -23,7 +23,13 @@ int main()
   u.print();
   
   v.zero();
+  v.insert(6, 1);
   v.print();
+  
+  u.print();
+  
+  int check = u.add(v);
+  printf("%d\n", check);
   
   return 0;
 }
