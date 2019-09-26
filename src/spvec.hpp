@@ -23,6 +23,7 @@ class spvec
     void print() const;
     int insert(const INDEX i, const SCALAR s);
     int add(const spvec &x);
+    int add(const SCALAR *x, const int xlen);
     
     int get_nnz() const {return nnz;};
     int get_len() const {return len;};
@@ -201,6 +202,46 @@ int spvec<INDEX, SCALAR>::add(const spvec &x)
       X[ind++] += xX[xind];
     else if (ind == nnz || I[ind] > xi)
       insert_from_ind(ind, xi, xX[xind]);
+  }
+  
+  return 0;
+}
+
+
+
+template <typename INDEX, typename SCALAR>
+int spvec<INDEX, SCALAR>::add(const SCALAR *x, const int xlen)
+{
+  int ind = 0;
+  
+  // pre-scan to see if a re-alloc is necessary
+  int num_inserted = 0;
+  for (int xi=0; xi<xlen; xi++)
+  {
+    if (x[xi] == (SCALAR)0)
+      continue;
+    
+    while (I[ind] < xi)
+      ind++;
+    
+    if (I[ind] > xi)
+      num_inserted++;
+  }
+  
+  if (num_inserted > (xlen - nnz))
+    return num_inserted;
+  
+  // add the vectors
+  ind = 0;
+  for (int xi=0; xi<xlen; xi++)
+  {
+    while (ind < nnz && I[ind] < xi)
+      ind++;
+    
+    if (I[ind] == xi)
+      X[ind++] += x[xi];
+    else if (ind == nnz || I[ind] > xi)
+      insert_from_ind(ind, xi, x[xi]);
   }
   
   return 0;

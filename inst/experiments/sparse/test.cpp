@@ -31,5 +31,13 @@ int main()
   int check = u.add(v);
   printf("%d\n", check);
   
+  u.zero();
+  u.insert(1, 1);
+  u.insert(2, 1);
+  int d[5] = {0, 1, 0, 0, 1};
+  
+  u.add(d, 5);
+  u.print();
+  
   return 0;
 }
