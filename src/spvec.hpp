@@ -21,7 +21,7 @@ class spvec
     void zero();
     
     void print() const;
-    bool insert(INDEX i, SCALAR s);
+    bool insert(const INDEX i, const SCALAR s);
     bool add(const spvec &x);
     
     int get_nnz() const {return nnz;};
@@ -147,7 +147,7 @@ void spvec<INDEX, SCALAR>::print() const
 
 
 template <typename INDEX, typename SCALAR>
-bool spvec<INDEX, SCALAR>::insert(INDEX i, SCALAR s)
+bool spvec<INDEX, SCALAR>::insert(const INDEX i, const SCALAR s)
 {
   if (this->nnz == this->len)
     return false;
