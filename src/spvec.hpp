@@ -39,6 +39,7 @@ class spvec
   
   private:
     void cleanup();
+    void insert_from_ind(const int insertion_ind, const INDEX i, const SCALAR s);
 };
 
 
@@ -159,15 +160,7 @@ bool spvec<INDEX, SCALAR>::insert(const INDEX i, const SCALAR s)
       break;
   }
   
-  for (int ind=this->nnz; ind>insertion_ind; ind--)
-  {
-    this->I[ind] = this->I[ind-1];
-    this->X[ind] = this->X[ind-1];
-  }
-  
-  this->I[insertion_ind] = i;
-  this->X[insertion_ind] = s;
-  this->nnz++;
+  insert_from_ind(insertion_ind, i, s);
   return true;
 }
 
@@ -185,13 +178,30 @@ bool spvec<INDEX, SCALAR>::add(const spvec &x)
 template <typename INDEX, typename SCALAR>
 void spvec<INDEX, SCALAR>::cleanup()
 {
-  if (this->I)
-    std::free(this->I);
-  if (this->X)
-    std::free(this->X);
+  if (I)
+    std::free(I);
+  if (X)
+    std::free(X);
   
-  this->nnz = 0;
-  this->len = 0;
+  nnz = 0;
+  len = 0;
+}
+
+
+
+template <typename INDEX, typename SCALAR>
+void spvec<INDEX, SCALAR>::insert_from_ind(const int insertion_ind,
+  const INDEX i, const SCALAR s)
+{
+  for (int ind=nnz; ind>insertion_ind; ind--)
+  {
+    I[ind] = I[ind-1];
+    X[ind] = X[ind-1];
+  }
+  
+  I[insertion_ind] = i;
+  X[insertion_ind] = s;
+  nnz++;
 }
 
 
