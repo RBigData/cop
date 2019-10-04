@@ -152,30 +152,40 @@ namespace sparsehelpers
 
 
 
-/*
-static inline int spadd_allreduce(const int root, SEXP send_data_s4, MPI_Comm comm)
+static inline SEXP spadd_allreduce(const int root, SEXP send_data_s4, MPI_Comm comm)
 {
   int mpi_ret;
+  int m, n;
+  sparsehelpers::sexp::get_dim_from_s4(send_data_s4, &m, &n);
+  
+  const int initial_len = sparsehelpers::sexp::get_col_len_from_s4(0, sparsehelpers::sexp::get_p_from_s4(send_data_s4)) * sparsehelpers::constants::MEM_FUDGE_ELT_FAC;
+  spvec<index_t, scalar_t> v(initial_len);
+  spmat<index_t, scalar_t> s(m, n, n * initial_len);
   
   for (index_t j=0; j<n; j++)
   {
+    sparsehelpers::s4col_to_spvec(j, send_data_s4, v);
+    // if (root == REDUCE_TO_ALL)
+    //   mpi_ret = MPI_Allreduce(MPI_IN_PLACE, tmp, m, MPI_SCALAR_T, MPI_SUM, comm);
+    // else
+    //   mpi_ret = MPI_Reduce(MPI_IN_PLACE, tmp, m, MPI_SCALAR_T, MPI_SUM, root, comm);
     
-    if (root == REDUCE_TO_ALL)
-      mpi_ret = MPI_Allreduce(MPI_IN_PLACE, tmp, m, MPI_SCALAR_T, MPI_SUM, comm);
-    else
-      mpi_ret = MPI_Reduce(MPI_IN_PLACE, tmp, m, MPI_SCALAR_T, MPI_SUM, root, comm);
     
-    
-    // TODO copy back
-    
+    int needed_space = s.insert(j, v);
+    if (needed_space > 0)
+    {
+      s.resize((s.get_len() + needed_space) * sparsehelpers::constants::MEM_FUDGE_ELT_FAC);
+      s.insert(j, v);
+    }
   }
   
+  s.print(true);
   
-  free(tmp);
-  
-  return mpi_ret;
+  SEXP recv_data;
+  PROTECT(recv_data = sparsehelpers::spmat_to_s4(s));
+  UNPROTECT(1);
+  return recv_data;
 }
-*/
 
 
 
@@ -183,7 +193,8 @@ extern "C" SEXP cop_allreduce_spmat_add(SEXP send_data_s4, SEXP root, SEXP R_com
 {
   MPI_Comm comm = get_mpi_comm_from_Robj(R_comm);
   
-  // TODO
-  
-  return R_NilValue;
+  SEXP ret;
+  PROTECT(ret = spadd_allreduce(INTEGER(root)[0], send_data_s4, comm));
+  UNPROTECT(1);
+  return ret;
 }
