@@ -103,6 +103,51 @@ namespace sparsehelpers
     s4col_to_spvec(col_ind, s4, s);
     return s;
   }
+  
+  
+  
+  template <typename INDEX, typename SCALAR>
+  static inline SEXP spmat_to_s4(const spmat<INDEX, SCALAR> &s)
+  {
+    SEXP s4_class, s4;
+    SEXP s4_i, s4_p, s4_Dim, s4_Dimnames, s4_x, s4_factors;
+    
+    const index_t m = s.nrows();
+    const index_t n = s.ncols();
+    const index_t nnz = s.get_nnz();
+    const index_t p_len = n+1;
+    
+    PROTECT(s4_i = allocVector(INTSXP, nnz));
+    arraytools::copy(nnz, s.index_ptr(), INTEGER(s4_i));
+    
+    PROTECT(s4_p = allocVector(INTSXP, p_len));
+    arraytools::copy(p_len, s.col_ptr(), INTEGER(s4_p));
+    
+    PROTECT(s4_Dim = allocVector(INTSXP, 2));
+    INTEGER(s4_Dim)[0] = (int) m;
+    INTEGER(s4_Dim)[1] = (int) n;
+    
+    PROTECT(s4_Dimnames = allocVector(VECSXP, 2));
+    SET_VECTOR_ELT(s4_Dimnames, 0, R_NilValue);
+    SET_VECTOR_ELT(s4_Dimnames, 1, R_NilValue);
+    
+    PROTECT(s4_x = allocVector(REALSXP, nnz));
+    arraytools::copy(nnz, s.data_ptr(), REAL(s4_x));
+    
+    PROTECT(s4_factors = allocVector(VECSXP, 0));
+    
+    PROTECT(s4_class = MAKE_CLASS("dgCMatrix"));
+    PROTECT(s4 = NEW_OBJECT(s4_class));
+    SET_SLOT(s4, install("i"), s4_i);
+    SET_SLOT(s4, install("p"), s4_p);
+    SET_SLOT(s4, install("Dim"), s4_Dim);
+    SET_SLOT(s4, install("Dimnames"), s4_Dimnames);
+    SET_SLOT(s4, install("x"), s4_x);
+    SET_SLOT(s4, install("factors"), s4_factors);
+    
+    UNPROTECT(8);
+    return s4;
+  }
 }
 
 
