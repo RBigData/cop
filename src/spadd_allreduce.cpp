@@ -88,7 +88,7 @@ namespace sparsehelpers
     SEXP s4_P = sexp::get_p_from_s4(s4);
     
     const int start_ind = INTEGER(s4_P)[col_ind];
-    const int col_len = (INTEGER(s4_P)[col_ind+1]-1) - start_ind;
+    const int col_len = INTEGER(s4_P)[col_ind+1] - start_ind;
     
     s.set(col_len, INTEGER(s4_I) + start_ind, REAL(s4_X) + start_ind);
   }
