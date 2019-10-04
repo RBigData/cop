@@ -71,20 +71,21 @@ namespace sparsehelpers
     {
       return LENGTH(s4_P);
     }
+    
+    static inline int get_col_len_from_s4(int col_ind, SEXP s4_P)
+    {
+      return INTEGER(s4_P)[col_ind+1] - INTEGER(s4_P)[col_ind];
+    }
   }
   
   
   
-  #include "debug/Rprinter.h"
   template <typename INDEX, typename SCALAR>
   static inline void s4col_to_spvec(const int col_ind, SEXP s4, spvec<INDEX, SCALAR> &s)
   {
     SEXP s4_X = sexp::get_x_from_s4(s4);
     SEXP s4_I = sexp::get_i_from_s4(s4); // len == nnz
     SEXP s4_P = sexp::get_p_from_s4(s4);
-    
-    PRINT(s4_I);
-    PRINT(s4_P);
     
     const int start_ind = INTEGER(s4_P)[col_ind];
     const int col_len = (INTEGER(s4_P)[col_ind+1]-1) - start_ind;
