@@ -3,14 +3,113 @@
 #include "utils.h"
 
 
+#include <cstdint>
+#include <Rdefines.h>
+#include <Rinternals.h>
+
+#include "spvec/src/arraytools.hpp"
+#include "spvec/src/spmat.hpp"
+#include "spvec/src/spvec.hpp"
+
+typedef int index_t;
+#define MPI_INDEX_T MPI_INT
+typedef uint32_t scalar_t;
+#define MPI_SCALAR_T MPI_UINT32_T
+
+
+
+namespace sparsehelpers
+{
+  namespace constants
+  {
+    const static float MEM_FUDGE_ELT_FAC = 1.675;
+    const static int MIN_LEN = 1;
+  }
+  
+  
+  
+  namespace sexp
+  {
+    namespace
+    {
+      static inline SEXP get_obj_from_s4(SEXP s4, const char *obj)
+      {
+        return GET_SLOT(s4, install(obj));
+      }
+    }
+    
+    
+    
+    static inline SEXP get_x_from_s4(SEXP s4)
+    {
+      return get_obj_from_s4(s4, "x");
+    }
+    
+    static inline SEXP get_i_from_s4(SEXP s4)
+    {
+      return get_obj_from_s4(s4, "i");
+    }
+    
+    static inline SEXP get_p_from_s4(SEXP s4)
+    {
+      return get_obj_from_s4(s4, "p");
+    }
+    
+    static inline void get_dim_from_s4(SEXP s4, int *m, int *n)
+    {
+      SEXP dim = get_obj_from_s4(s4, "Dim");
+      *m = INTEGER(dim)[0];
+      *n = INTEGER(dim)[1];
+    }
+    
+    static inline int get_nnz_from_s4(SEXP s4_I)
+    {
+      return LENGTH(s4_I);
+    }
+    
+    static inline int get_plen_from_s4(SEXP s4_P)
+    {
+      return LENGTH(s4_P);
+    }
+  }
+  
+  
+  
+  #include "debug/Rprinter.h"
+  template <typename INDEX, typename SCALAR>
+  static inline void s4col_to_spvec(const int col_ind, SEXP s4, spvec<INDEX, SCALAR> &s)
+  {
+    SEXP s4_X = sexp::get_x_from_s4(s4);
+    SEXP s4_I = sexp::get_i_from_s4(s4); // len == nnz
+    SEXP s4_P = sexp::get_p_from_s4(s4);
+    
+    PRINT(s4_I);
+    PRINT(s4_P);
+    
+    const int start_ind = INTEGER(s4_P)[col_ind];
+    const int col_len = (INTEGER(s4_P)[col_ind+1]-1) - start_ind;
+    
+    s.set(col_len, INTEGER(s4_I) + start_ind, REAL(s4_X) + start_ind);
+  }
+  
+  template <typename INDEX, typename SCALAR>
+  static inline spvec<INDEX, SCALAR> s4col_to_spvec(const int col_ind, SEXP s4)
+  {
+    SEXP s4_P = sexp::get_p_from_s4(s4);
+    const int col_len = INTEGER(s4_P)[col_ind+1] - INTEGER(s4_P)[col_ind];
+    
+    spvec<INDEX, SCALAR> s(col_len * constants::MEM_FUDGE_ELT_FAC);
+    s4col_to_spvec(col_ind, s4, s);
+    return s;
+  }
+}
+
+
+
 /*
-static inline int spadd_allreduce(const int root, MPI_Comm comm)
+static inline int spadd_allreduce(const int root, SEXP send_data_s4, MPI_Comm comm)
 {
   int mpi_ret;
-  
-  const index_t m = send_data.rows();
-  const index_t n = send_data.cols();
-  scalar_t *tmp = (scalar_t*) malloc(m * sizeof(*tmp));
   
   for (index_t j=0; j<n; j++)
   {

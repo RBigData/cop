@@ -1,0 +1,3 @@
+[submodule "src/spvec"]
+	path = src/spvec
+	url = https://github.com/wrathematics/spvec
