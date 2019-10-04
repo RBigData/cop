@@ -97,7 +97,7 @@ namespace sparsehelpers
   static inline spvec<INDEX, SCALAR> s4col_to_spvec(const int col_ind, SEXP s4)
   {
     SEXP s4_P = sexp::get_p_from_s4(s4);
-    const int col_len = INTEGER(s4_P)[col_ind+1] - INTEGER(s4_P)[col_ind];
+    const int col_len = sexp::get_col_len_from_s4(col_ind, s4_P);
     
     spvec<INDEX, SCALAR> s(col_len * constants::MEM_FUDGE_ELT_FAC);
     s4col_to_spvec(col_ind, s4, s);
