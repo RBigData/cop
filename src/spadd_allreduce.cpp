@@ -152,6 +152,27 @@ namespace sparsehelpers
 
 
 
+spvec<index_t, scalar_t> _a;
+spvec<index_t, scalar_t> _b;
+
+typedef struct
+{
+  index_t *i;
+  scalar_t *x;
+} spvec_struct_t;
+
+void custom_op_spadd(void *a, void *b, int *len, MPI_Datatype *dtype)
+{
+  (void)a;
+  (void)b;
+  (void)len;
+  (void)dtype;
+  
+  int check = _b.add(_a);
+}
+
+
+
 static inline SEXP spadd_allreduce(const int root, SEXP send_data_s4, MPI_Comm comm)
 {
   int mpi_ret;
