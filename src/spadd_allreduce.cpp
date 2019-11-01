@@ -177,6 +177,7 @@ static inline SEXP spadd_allreduce_densevec(const int root, SEXP send_data_s4, M
     
     check_MPI_ret(mpi_ret);
     
+    d.update_nnz();
     a.set(d);
     
     int needed_space = s.insert(j, a);
