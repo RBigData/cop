@@ -152,92 +152,40 @@ namespace sparsehelpers
 
 
 
-spvec<index_t, scalar_t> _a;
-spvec<index_t, scalar_t> _b;
-
-typedef struct
-{
-  index_t *i;
-  scalar_t *x;
-} spvec_struct_t;
-
-void custom_op_spadd(void *a, void *b, int *len, MPI_Datatype *dtype)
-{
-  (void)a;
-  (void)b;
-  (void)len;
-  (void)dtype;
-  
-  int check = _b.add(_a);
-}
-
-
-
-static inline SEXP spadd_allreduce(const int root, SEXP send_data_s4, MPI_Comm comm)
+static inline SEXP spadd_allreduce_densevec(const int root, SEXP send_data_s4, MPI_Comm comm)
 {
   int mpi_ret;
   int m, n;
   sparsehelpers::sexp::get_dim_from_s4(send_data_s4, &m, &n);
   
   // setup
-  const int initial_len = 200; // sparsehelpers::sexp::get_col_len_from_s4(0, sparsehelpers::sexp::get_p_from_s4(send_data_s4)) * sparsehelpers::constants::MEM_FUDGE_ELT_FAC;
-  _a.resize(initial_len);
-  _b.resize(initial_len);
-  spmat<index_t, scalar_t> s(m, n, n*initial_len);
-  spvec_struct_t a;
-  spvec_struct_t b;
-  
-  MPI_Op op;
-  const int commutative = 1;
-  MPI_Op_create((MPI_User_function*) custom_op_spadd, commutative, &op);
-  
-  // TODO re-align on failure
-  int blocklengths[] = { _a.get_len(), _a.get_len() };
-  MPI_Aint displacements[] = { sizeof(index_t), sizeof(scalar_t) };
-  MPI_Datatype types[] = { MPI_INDEX_T, MPI_SCALAR_T };
-  MPI_Datatype mpi_spvec;
-
-  MPI_Type_create_struct(2, blocklengths, displacements, types, &mpi_spvec);
-  // MPI_Type_get_extent(...);
-  // MPI_Type_create_resized(...);
-  MPI_Type_commit(&mpi_spvec);
-  
+  const int len = sparsehelpers::sexp::get_col_len_from_s4(0, sparsehelpers::sexp::get_p_from_s4(send_data_s4)) * sparsehelpers::constants::MEM_FUDGE_ELT_FAC;
+  spvec<index_t, scalar_t> a(len);
+  spmat<index_t, scalar_t> s(m, n, n*len);
+  dvec<index_t, scalar_t> d(m);
   
   // allreduce column-by-column
   for (index_t j=0; j<n; j++)
   {
-    sparsehelpers::s4col_to_spvec(j, send_data_s4, _a);
-    
-    a.i = _a.index_ptr();
-    a.x = _a.data_ptr();
-    
-    b.i = _b.index_ptr();
-    b.x = _b.data_ptr();
+    sparsehelpers::s4col_to_spvec(j, send_data_s4, a);
+    a.densify(d);
     
     if (root == REDUCE_TO_ALL)
-      mpi_ret = MPI_Allreduce(&a, &b, 1, mpi_spvec, op, comm);
+      mpi_ret = MPI_Allreduce(MPI_IN_PLACE, d.data_ptr(), m, MPI_SCALAR_T, MPI_SUM, comm);
     else
-      mpi_ret = MPI_Reduce(&a, &b, 1, mpi_spvec, op, root, comm);
+      mpi_ret = MPI_Reduce(MPI_IN_PLACE, d.data_ptr(), m, MPI_SCALAR_T, MPI_SUM, root, comm);
     
-    int needed_space = s.insert(j, _b);
+    check_MPI_ret(mpi_ret);
+    
+    a.set(d);
+    
+    int needed_space = s.insert(j, a);
     if (needed_space > 0)
     {
       s.resize((s.get_len() + needed_space) * sparsehelpers::constants::MEM_FUDGE_ELT_FAC);
-      s.insert(j, _b);
+      s.insert(j, a);
     }
   }
-  
-  
-  s.print();
-  
-  MPI_Type_free(&mpi_spvec);
-  
-  
-  // cleanup and return
-  _a.~spvec();
-  _b.~spvec();
-  MPI_Op_free(&op);
-  
   
   SEXP recv_data;
   PROTECT(recv_data = sparsehelpers::spmat_to_s4(s));
@@ -252,7 +200,7 @@ extern "C" SEXP cop_allreduce_spmat_add(SEXP send_data_s4, SEXP root, SEXP R_com
   MPI_Comm comm = get_mpi_comm_from_Robj(R_comm);
   
   SEXP ret;
-  PROTECT(ret = spadd_allreduce(INTEGER(root)[0], send_data_s4, comm));
+  PROTECT(ret = spadd_allreduce_densevec(INTEGER(root)[0], send_data_s4, comm));
   UNPROTECT(1);
   return ret;
 }
