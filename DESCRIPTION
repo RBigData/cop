@@ -10,6 +10,8 @@ Depends:
 Imports:
     utils,
     float (>= 0.2-0)
+Enhances:
+    Matrix
 LinkingTo:
     float (>= 0.2-0)
 SystemRequirements: C++14
