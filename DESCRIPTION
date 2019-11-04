@@ -2,7 +2,7 @@ Package: cop
 Type: Package
 Title: Custom OPs
 Version: 0.1-0
-Description: Some custom reduction operations for 'MPI'.
+Description: Some custom reduction operations for data distributed over 'MPI'.
 License: BSD 2-clause License + file LICENSE
 Depends:
     R (>= 3.4.0),

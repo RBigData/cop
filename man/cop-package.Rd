@@ -5,7 +5,7 @@
 \alias{cop-package}
 \title{Custom OPs}
 \description{
-TODO
+Some custom reduction operations for data distributed over MPI.
 }
 \references{
 Programming with Big Data in R Website: \url{https://pbdr.org/}

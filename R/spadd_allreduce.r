@@ -11,25 +11,25 @@ spadd_reducer = function(x, root, comm, type)
 
 #' Sparse Adder Reduction
 #' 
-#' TODO
-#' 
-#' @details
-#' TODO
+#' Given a sparse matrix on each process, this computes the sum of all of those
+#' matrices. The return will be stored as a sparse matrix, although it is not
+#' guaranteed to be sparse.
 #' 
 #' @param x
-#' The input data. Should be a numeric matrix. The matrix should be the same
-#' dimensions across all processes.
+#' The input data. Should be a sparse \code{"dgCMatrix"} object. The matrix
+#' should be the same dimensions across all processes.
 #' @param comm
 #' MPI communicator number.
 #' @param type
-#' The precision used for the intermediate calculations. Should be one of
+#' The type used for the intermediate operations. Should be one of
 #' "double" or "float".
 #' @param root
 #' MPI rank that should receive the return in the non-all version.
 #' 
 #' @return
 #' If the all version is called or if the calling rank is equal to \code{root},
-#' then a numeric matrix is returned, and otherwise \code{NULL}.
+#' then a sparse \code{"dgCMatrix"} object is returned, and otherwise
+#' \code{NULL}.
 #' 
 #' @name spadd_allreduce
 #' @rdname spadd_allreduce

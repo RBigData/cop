@@ -17,23 +17,23 @@ spadd_reduce(x, root = 0L, comm = 0L, type = "double")
   type = "double")
 }
 \arguments{
-\item{x}{The input data. Should be a numeric matrix. The matrix should be the same
-dimensions across all processes.}
+\item{x}{The input data. Should be a sparse \code{"dgCMatrix"} object. The matrix
+should be the same dimensions across all processes.}
 
 \item{comm}{MPI communicator number.}
 
-\item{type}{The precision used for the intermediate calculations. Should be one of
+\item{type}{The type used for the intermediate operations. Should be one of
 "double" or "float".}
 
 \item{root}{MPI rank that should receive the return in the non-all version.}
 }
 \value{
 If the all version is called or if the calling rank is equal to \code{root},
-then a numeric matrix is returned, and otherwise \code{NULL}.
+then a sparse \code{"dgCMatrix"} object is returned, and otherwise
+\code{NULL}.
 }
 \description{
-TODO
-}
-\details{
-TODO
+Given a sparse matrix on each process, this computes the sum of all of those
+matrices. The return will be stored as a sparse matrix, although it is not
+guaranteed to be sparse.
 }

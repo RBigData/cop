@@ -1,6 +1,6 @@
 #' Custom OPs
 #' 
-#' TODO
+#' Some custom reduction operations for data distributed over MPI.
 #' 
 #' @import pbdMPI
 #' @importFrom float fl

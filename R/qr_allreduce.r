@@ -36,11 +36,8 @@ qr_reducer = function(x, root, comm=0L, type)
 #' @details
 #' This works by defining a custom MPI data type (dense matrix) with a custom
 #' reduction operation (given 2 R matrices, "stack" them, compute the stacked
-#' QR and emit R).
-#' Most likely, your MPI implementation uses 
-#' 
-#' Each local operation uses the LAPACK functions \code{_geqp3()}, similar to R's \code{qr()} with
-#' \code{LAPACK=TRUE}.
+#' QR and emit R). Each local operation uses the LAPACK functions
+#' \code{_geqp3()}, similar to R's \code{qr()} with \code{LAPACK=TRUE}.
 #' 
 #' @param x
 #' The input data. Should be a numeric matrix. The matrix should be the same
