@@ -6,7 +6,7 @@
 * **Author:** Drew Schmidt
 
 
-Custom OPs for reductions with MPI.
+Some custom reduction operations for data distributed over MPI.
 
 
 ## Installation
@@ -27,8 +27,15 @@ Dense, numeric matrix reductions:
 |--------|-------------|
 | `cop_allreduce()` | Reduction that accepts a custom operation (R function). The function has some strong caveats; see `?cop::cop_allreduce` for details. |
 | `cop_reduce()` |  |
-| `qr_allreduce()` | Reduction where each process owns the R matrix of a QR decomposition, and the reduction is (conceptually) `op = function(a, b) qr.R(qr(a, b))` |
+| `qr_allreduce()` | Reduction where each process owns the R matrix of a QR decomposition, and the reduction is (conceptually) `op = function(a, b) qr.R(qr(a, b))`. |
 | `qr_reduce()` |  |
+
+Sparse matrix reductions:
+
+| Method | Explanation |
+|--------|-------------|
+| `spadd_allreduce()` | Reduction where each process owns a sparse matrix (`dgCMatrix` from the Matrix package), and the reduction sums all of the matrices. |
+| `spadd_reduce()` |  |
 
 The difference between the `_reduce()` and the `_allreduce()` variants is that with the former, only the process specified by the `root` argument receives the return.
 
