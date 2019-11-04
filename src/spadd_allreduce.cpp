@@ -2,7 +2,6 @@
 #include "defs.h"
 #include "utils.h"
 
-
 #include <cstdint>
 #include <Rdefines.h>
 #include <Rinternals.h>
@@ -10,12 +9,6 @@
 #include "spvec/src/arraytools.hpp"
 #include "spvec/src/spmat.hpp"
 #include "spvec/src/spvec.hpp"
-
-typedef int index_t;
-#define MPI_INDEX_T MPI_INT
-typedef uint32_t scalar_t;
-#define MPI_SCALAR_T MPI_UINT32_T
-
 
 
 namespace sparsehelpers
@@ -112,10 +105,10 @@ namespace sparsehelpers
     SEXP s4_class, s4;
     SEXP s4_i, s4_p, s4_Dim, s4_Dimnames, s4_x, s4_factors;
     
-    const index_t m = s.nrows();
-    const index_t n = s.ncols();
-    const index_t nnz = s.get_nnz();
-    const index_t p_len = n+1;
+    const INDEX m = s.nrows();
+    const INDEX n = s.ncols();
+    const INDEX nnz = s.get_nnz();
+    const INDEX p_len = n+1;
     
     PROTECT(s4_i = allocVector(INTSXP, nnz));
     arraytools::copy(nnz, s.index_ptr(), INTEGER(s4_i));
@@ -152,7 +145,8 @@ namespace sparsehelpers
 
 
 
-static inline SEXP spadd_allreduce_densevec(const int root, SEXP send_data_s4, MPI_Comm comm)
+template <typename INDEX, typename SCALAR>
+static inline spmat<INDEX, SCALAR> spadd_allreduce_densevec(const int root, SEXP send_data_s4, MPI_Comm comm)
 {
   int mpi_ret;
   int m, n;
@@ -160,20 +154,24 @@ static inline SEXP spadd_allreduce_densevec(const int root, SEXP send_data_s4, M
   
   // setup
   const int len = sparsehelpers::sexp::get_col_len_from_s4(0, sparsehelpers::sexp::get_p_from_s4(send_data_s4)) * sparsehelpers::constants::MEM_FUDGE_ELT_FAC;
-  spvec<index_t, scalar_t> a(len);
-  spmat<index_t, scalar_t> s(m, n, n*len);
-  dvec<index_t, scalar_t> d(m);
+  spvec<INDEX, SCALAR> a(len);
+  spmat<INDEX, SCALAR> s(m, n, n*len);
+  dvec<INDEX, SCALAR> d(m);
+  
+  const MPI_Datatype reduce_type = mpi_type_lookup(*d.data_ptr());
+  if (reduce_type == MPI_DATATYPE_NULL)
+    error("unknown reducer type");
   
   // allreduce column-by-column
-  for (index_t j=0; j<n; j++)
+  for (INDEX j=0; j<n; j++)
   {
     sparsehelpers::s4col_to_spvec(j, send_data_s4, a);
     a.densify(d);
     
     if (root == REDUCE_TO_ALL)
-      mpi_ret = MPI_Allreduce(MPI_IN_PLACE, d.data_ptr(), m, MPI_SCALAR_T, MPI_SUM, comm);
+      mpi_ret = MPI_Allreduce(MPI_IN_PLACE, d.data_ptr(), m, reduce_type, MPI_SUM, comm);
     else
-      mpi_ret = MPI_Reduce(MPI_IN_PLACE, d.data_ptr(), m, MPI_SCALAR_T, MPI_SUM, root, comm);
+      mpi_ret = MPI_Reduce(MPI_IN_PLACE, d.data_ptr(), m, reduce_type, MPI_SUM, root, comm);
     
     check_MPI_ret(mpi_ret);
     
@@ -188,20 +186,22 @@ static inline SEXP spadd_allreduce_densevec(const int root, SEXP send_data_s4, M
     }
   }
   
-  SEXP recv_data;
-  PROTECT(recv_data = sparsehelpers::spmat_to_s4(s));
-  UNPROTECT(1);
-  return recv_data;
+  return s;
 }
 
 
 
 extern "C" SEXP cop_allreduce_spmat_add(SEXP send_data_s4, SEXP root, SEXP R_comm)
 {
+  SEXP ret;
   MPI_Comm comm = get_mpi_comm_from_Robj(R_comm);
   
-  SEXP ret;
-  PROTECT(ret = spadd_allreduce_densevec(INTEGER(root)[0], send_data_s4, comm));
+  using INDEX = int;
+  
+  using SCALAR = uint32_t;
+  auto s = spadd_allreduce_densevec<INDEX, SCALAR>(INTEGER(root)[0], send_data_s4, comm);
+  PROTECT(ret = sparsehelpers::spmat_to_s4(s));
+  
   UNPROTECT(1);
   return ret;
 }
