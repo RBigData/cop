@@ -26,8 +26,8 @@ t = comm.timer({
   ret <- spadd_allreduce(s)
 })
 
-mpi_cat(sprintf("input %% dense: %.2f\n", 100*prop_dense), quiet=TRUE)
-mpi_cat(sprintf("outpt %% dense: %.2f\n", 100*nnzero(ret)/prod(dim(s))), quiet=TRUE)
+mpi_cat(sprintf("input density: %.2f%%\n", 100*prop_dense), quiet=TRUE)
+mpi_cat(sprintf("outpt density: %.2f%%\n", 100*nnzero(ret)/prod(dim(s))), quiet=TRUE)
 mpi_cat(sprintf("run time: %.3f\n", t[["max"]]), quiet=TRUE)
 
 
