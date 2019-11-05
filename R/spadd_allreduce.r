@@ -4,7 +4,10 @@ spadd_reducer = function(x, root, comm, type)
   comm = as.integer(comm)
   comm_ptr = pbdMPI::get.mpi.comm.ptr(comm)
   
-  .Call(cop_allreduce_spmat_add, x, root, comm_ptr)
+  type = comm.match.arg(tolower(type), TYPES_STR, comm=comm)
+  type_int = type_str2int(type)
+  
+  .Call(cop_allreduce_spmat_add, x, root, comm_ptr, type_int)
 }
 
 
