@@ -18,8 +18,5 @@
 #define TYPE_UINT32 10
 #define TYPE_UINT64 11
 
-#define MAX(a,b) ((a)<(b)?(b):(a))
-#define MIN(a,b) ((a)<(b)?(a):(b))
-
 
 #endif
