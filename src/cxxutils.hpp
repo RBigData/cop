@@ -17,6 +17,8 @@
 template <typename T>
 static inline MPI_Datatype mpi_type_lookup(T x)
 {
+  (void) x;
+  
   // C types
   if (typeid(T) == typeid(char))
     return MPI_CHAR;
