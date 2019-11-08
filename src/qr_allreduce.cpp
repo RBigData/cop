@@ -61,12 +61,13 @@ void qr_global_init(int m, int n)
   
   _badinfo = false;
   
-  _tallboy<REAL> = (REAL*) malloc(_mtb*_n * sizeof(REAL));
+  arraytools::alloc(_mtb*_n, &(_tallboy<REAL>));
   _lwork = qr_worksize<REAL>(_mtb, _n);
-  _work<REAL> = (REAL*) malloc(_lwork * sizeof(REAL));
-  _qraux<REAL> = (REAL*) malloc(_minmn * sizeof(REAL));
-  _pivot = (int*) malloc(_n * sizeof(REAL));
+  arraytools::alloc(_lwork, &(_work<REAL>));
+  arraytools::alloc(_minmn, &(_qraux<REAL>));
+  arraytools::alloc(_n, &_pivot);
   
+  // TODO use arraytools::check_alloc
   if (_tallboy<REAL> == NULL || _work<REAL> == NULL || _qraux<REAL> == NULL || _pivot == NULL)
   {
     qr_global_cleanup<REAL>();
