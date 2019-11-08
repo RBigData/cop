@@ -1,14 +1,9 @@
-#include <algorithm>
-#include <cstddef>
-#include <cstdlib>
-#include <cstring>
+#include"spvec/src/arraytools.hpp"
 
 #include "cxxutils.hpp"
 #include "defs.h"
 #include "lapack.hpp"
 #include "utils.h"
-
-#include"spvec/src/arraytools.hpp"
 
 
 int _m, _n, _minmn, _mtb;
