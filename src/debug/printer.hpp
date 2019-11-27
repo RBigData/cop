@@ -1,5 +1,6 @@
 #ifndef COP_DEBUG_PRINTER_H
 #define COP_DEBUG_PRINTER_H
+#pragma once
 
 
 #include <cstdio>

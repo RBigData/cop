@@ -1,3 +1,8 @@
+#ifndef COP_EIGENHELPERS_H
+#define COP_EIGENHELPERS_H
+#pragma once
+
+
 #include <Eigen/SparseCore>
 
 #include <cstdint>
@@ -155,3 +160,6 @@ namespace eigenhelpers
       d[ I[i] ] = X[i];
   }
 }
+
+
+#endif

@@ -1,5 +1,6 @@
 #ifndef COP_UTILS_H
 #define COP_UTILS_H
+#pragma once
 
 
 #include <mpi.h>

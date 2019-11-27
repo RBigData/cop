@@ -1,5 +1,6 @@
 #ifndef COP_CXXUTILS_H
 #define COP_CXXUTILS_H
+#pragma once
 
 
 #ifndef restrict

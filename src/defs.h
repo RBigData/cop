@@ -1,5 +1,6 @@
 #ifndef COP_DEFS_H
 #define COP_DEFS_H
+#pragma once
 
 
 #define REDUCE_TO_ALL -1

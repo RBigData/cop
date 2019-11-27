@@ -1,5 +1,6 @@
 #ifndef COP_DEBUG_RPRINTER_H
 #define COP_DEBUG_RPRINTER_H
+#pragma once
 
 
 #include <Rinternals.h>

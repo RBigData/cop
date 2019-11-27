@@ -1,5 +1,6 @@
 #ifndef COP_LAPACK_H
 #define COP_LAPACK_H
+#pragma once
 
 
 extern "C" void sgeqp3_(const int *const m, const int *const n,
