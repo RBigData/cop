@@ -6,7 +6,7 @@
 #include <Rdefines.h>
 #include <Rinternals.h>
 
-#include "spvec/src/arraytools.hpp"
+#include "spvec/src/arraytools/src/arraytools.hpp"
 #include "spvec/src/spmat.hpp"
 #include "spvec/src/spvec.hpp"
 
