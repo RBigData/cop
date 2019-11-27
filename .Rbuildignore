@@ -1,3 +1,15 @@
 inst/experiments
+
 src/spvec/.git
+src/spvec/.gitignore
+src/spvec/.travis.yml
+src/spvec/examples
 src/spvec/tests
+src/spvec/README.md
+
+src/spvec/src/arraytools/.git
+src/spvec/src/arraytools/.gitignore
+src/spvec/src/arraytools/.travis.yml
+src/spvec/src/arraytools/examples
+src/spvec/src/arraytools/tests
+src/spvec/src/arraytools/README.md
