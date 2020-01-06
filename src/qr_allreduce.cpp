@@ -1,4 +1,4 @@
-#include "spvec/src/arraytools/src/arraytools.hpp"
+#include <arraytools/src/arraytools.hpp>
 
 #include "cxxutils.hpp"
 #include "defs.h"
