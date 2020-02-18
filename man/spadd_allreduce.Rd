@@ -13,8 +13,7 @@ spadd_reduce(x, root = 0L, comm = 0L, type = "double")
 
 \method{spadd_allreduce}{dgCMatrix}(x, comm = 0L, type = "double")
 
-\method{spadd_reduce}{dgCMatrix}(x, root = 0L, comm = 0L,
-  type = "double")
+\method{spadd_reduce}{dgCMatrix}(x, root = 0L, comm = 0L, type = "double")
 }
 \arguments{
 \item{x}{The input data. Should be a sparse \code{"dgCMatrix"} object. The matrix

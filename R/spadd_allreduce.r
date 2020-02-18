@@ -1,4 +1,4 @@
-#' @useDynLib cop cop_allreduce_spmat_add
+#' @useDynLib cop cop_allreduce_spar_densevec
 spadd_reducer = function(x, root, comm, type)
 {
   comm = as.integer(comm)
@@ -7,7 +7,7 @@ spadd_reducer = function(x, root, comm, type)
   type = comm.match.arg(tolower(type), TYPES_STR, comm=comm)
   type_int = type_str2int(type)
   
-  .Call(cop_allreduce_spmat_add, x, root, comm_ptr, type_int)
+  .Call(cop_allreduce_spar_densevec, x, root, comm_ptr, type_int)
 }
 
 
