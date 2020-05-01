@@ -1,6 +1,6 @@
 #include <spar.hpp>
 #include <converters/s4.hpp>
-#include <mpi/reduce.hpp>
+#include <reduce.hpp>
 
 #include "cxxutils.hpp"
 #include "defs.h"
@@ -87,7 +87,7 @@ extern "C" SEXP cop_allreduce_spar_densevec(SEXP send_data_s4, SEXP root_,
   using INDEX = int;
   const int scalar_type = INTEGER(scalar_type_)[0];
   
-  REDUCE(scalar_type, spar::mpi::reduce_densevec)
+  REDUCE(scalar_type, spar::reduce::dense)
   
   UNPROTECT(1);
   return ret;
@@ -105,7 +105,7 @@ extern "C" SEXP cop_allreduce_spar_gather(SEXP send_data_s4, SEXP root_,
   using INDEX = int;
   const int scalar_type = INTEGER(scalar_type_)[0];
   
-  REDUCE(scalar_type, spar::mpi::reduce_gather)
+  REDUCE(scalar_type, spar::reduce::gather)
   
   UNPROTECT(1);
   return ret;
