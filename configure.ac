@@ -15,12 +15,12 @@ SPMD_CPPFLAGS=`${R_SCMD} "source('./R/conf/get_conf.r');get.conf('PKG_CPPFLAGS',
 SPMD_LDFLAGS=`${R_SCMD} "source('./R/conf/get_conf.r');get.conf('PKG_LIBS','"${R_ARCH}"')"`
 
 echo " "
-echo "****************** Results of kazaam package configure *****************"
+echo "******************** Results of cop package configure *******************"
 echo " "
 echo ">> SPMD_CPPFLAGS = ${SPMD_CPPFLAGS}"
 echo ">> SPMD_LDFLAGS = ${SPMD_LDFLAGS}"
 echo " "
-echo "************************************************************************"
+echo "*************************************************************************"
 echo " "
 
 
