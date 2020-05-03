@@ -105,7 +105,9 @@ extern "C" SEXP cop_allreduce_spar_gather(SEXP send_data_s4, SEXP root_,
   using INDEX = int;
   const int scalar_type = INTEGER(scalar_type_)[0];
   
-  REDUCE(scalar_type, spar::reduce::gather)
+  TRY_CATCH(
+    REDUCE(scalar_type, spar::reduce::gather)
+  )
   
   UNPROTECT(1);
   return ret;
