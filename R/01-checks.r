@@ -40,7 +40,20 @@ is.posint <- function(x)
 
 
 
-check_is_flag = function(x, comm)
+check_is_posint = function(x)
+{
+  if (!is.numeric(x) || is.annoying(x) || !is.inty(x) || x<1)
+  {
+    nm <- deparse(substitute(x))
+    stop(paste0("argument '", nm, "' must be an integer"), call.=FALSE)
+  }
+  
+  invisible(TRUE)
+}
+
+
+
+comm_check_is_flag = function(x, comm)
 {
   if (!is.flag(x))
   {
@@ -51,9 +64,7 @@ check_is_flag = function(x, comm)
   invisible(TRUE)
 }
 
-
-
-check_is_int = function(x, comm)
+comm_check_is_int = function(x, comm)
 {
   if (!is.numeric(x) || is.annoying(x) || !is.inty(x))
   {
@@ -64,9 +75,7 @@ check_is_int = function(x, comm)
   invisible(TRUE)
 }
 
-
-
-check_is_function = function(x, comm)
+comm_check_is_function = function(x, comm)
 {
   if (!is.function(x))
   {
@@ -77,9 +86,7 @@ check_is_function = function(x, comm)
   invisible(TRUE)
 }
 
-
-
-check_is_matrix = function(x, comm)
+comm_check_is_matrix = function(x, comm)
 {
   if (!is.matrix(x) || !is.numeric(x))
   {
@@ -90,9 +97,7 @@ check_is_matrix = function(x, comm)
   invisible(TRUE)
 }
 
-
-
-check_common_matrix_dims = function(x, comm)
+comm_check_common_matrix_dims = function(x, comm)
 {
   dims = as.double(dim(x))
   alldims = pbdMPI::allgather(dims, comm=comm)

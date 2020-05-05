@@ -5,10 +5,10 @@ REDUCE_TO_ALL = -1L
 #' @useDynLib cop cop_allreduce_mat_userop
 reducer = function(x, op, commutative, root, comm=0L)
 {
-  check_is_matrix(x, comm)
-  check_is_function(op, comm)
-  check_is_flag(commutative, comm)
-  check_is_int(root, comm)
+  comm_check_is_matrix(x, comm)
+  comm_check_is_function(op, comm)
+  comm_check_is_flag(commutative, comm)
+  comm_check_is_int(root, comm)
   
   commutative = as.logical(commutative)
   

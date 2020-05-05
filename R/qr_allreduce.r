@@ -1,9 +1,9 @@
 #' @useDynLib cop cop_allreduce_mat_qr
 qr_reducer = function(x, root, comm=0L, type)
 {
-  check_is_matrix(x, comm)
-  check_common_matrix_dims(x, comm)
-  check_is_int(root, comm)
+  comm_check_is_matrix(x, comm)
+  comm_check_common_matrix_dims(x, comm)
+  comm_check_is_int(root, comm)
   type = comm.match.arg(tolower(type), TYPES_STR_NUMERIC, comm=comm)
   type_int = type_str2int(type)
   
