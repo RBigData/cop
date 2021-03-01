@@ -11,10 +11,11 @@ Some custom reduction operations for data distributed over MPI.
 
 ## Installation
 
-The development version is maintained on GitHub:
+The development version is maintained on GitHub. Because the package uses git submodules, you can not use any of the `install_github()` functions. Instead you can do this:
 
 ```r
-remotes::install_github("RBigData/cop")
+source("https://gist.githubusercontent.com/wrathematics/ccf6bf366279e099563e69e56b4fde59/raw/6daf038ca56f4f531f631f80a54d8d9aa70b4bbb/ighwsm.r")
+ighwsm("RBigData/cop")
 ```
 
 
