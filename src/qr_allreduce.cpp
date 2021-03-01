@@ -155,6 +155,7 @@ namespace tsqr
 }
 
 
+
 extern "C" SEXP cop_allreduce_mat_qr(SEXP send_data, SEXP R_comm, SEXP root_,
   SEXP type)
 {
